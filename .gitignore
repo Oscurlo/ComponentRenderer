@@ -1,0 +1,6 @@
+# Configuración de mí VS Code
+.vscode
+
+# Dependencias
+vendor
+composer.lock
