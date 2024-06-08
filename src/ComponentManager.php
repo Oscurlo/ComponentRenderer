@@ -128,8 +128,8 @@ class ComponentManager
         foreach ($components as $component) {
             $html = str_ireplace(
                 ...[
-                    "comment" => [["<{$component}", "{$component}>"], ["<!-- <{$component}", "{$component}> -->"], $html],
-                    "uncomment" => [["<!-- <{$component}", "{$component}> -->"], ["<{$component}", "{$component}>"], $html]
+                    "comment" => [["<{$component}", "</{$component}>"], ["<!-- <{$component}", "</{$component}> -->"], $html],
+                    "uncomment" => [["<!-- <{$component}", "</{$component}> -->"], ["<{$component}", "</{$component}>"], $html]
                 ][$action]
             );
         }
