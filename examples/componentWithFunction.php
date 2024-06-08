@@ -2,17 +2,29 @@
 
 use Oscurlo\ComponentRenderer\ComponentRenderer;
 
-require_once "../vendor/autoload.php";
 
-$renderer = new ComponentRenderer(__DIR__ . "/components"); // Ajusta el path a donde tienes los componentes
+include "../vendor/autoload.php";
 
-$components = ["GoodbyeWorld::sayGoodbye", "HelloWorld"];
+$ComponentRenderer = new ComponentRenderer(
+    source: "./components/"
+);
 
-$renderer->start($components);
+?>
 
-echo <<<HTML
-<GoodbyeWorld::sayGoodbye name="Bob">This should be replaced</GoodbyeWorld::sayGoodbye>
-<HelloWorld name="Esteban">This should be replaced</HelloWorld>
-HTML;
+<!DOCTYPE html>
+<html lang="en">
 
-$renderer->end();
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>component with function</title>
+</head>
+
+<body>
+    <?php $ComponentRenderer->start("HelloWorld") ?>
+    <HelloWorld></HelloWorld>
+    <HelloWorld>Hola <b>wenas</b></HelloWorld>
+    <?php $ComponentRenderer->end() ?>
+</body>
+
+</html>
