@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Oscurlo\ComponentRenderer;
 
@@ -18,7 +20,17 @@ class ComponentBuffer extends ComponentInterpreter
             throw new Exception("Path for components is not defined.");
         }
 
-        ob_start(fn($content) => $this->interpreter($content, $components));
+        if (!is_array($components)) {
+            $components = [$components];
+        }
+
+        ob_start(fn ($content) => self::interpreter(
+            self::comment_component(
+                $content,
+                $components
+            ),
+            $components
+        ));
     }
 
     /**

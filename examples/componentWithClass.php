@@ -28,7 +28,7 @@ $ComponentRenderer = new ComponentRenderer(
 </head>
 
 <body class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-    <?php $ComponentRenderer->start(["Bootstrap::card", "Bootstrap::accordion"]) ?>
+    <?php $ComponentRenderer->start(["Bootstrap::accordion", "Bootstrap::card"]) ?>
     <div class="container">
         <div class="row">
             <div class="col-6">

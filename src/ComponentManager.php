@@ -1,25 +1,17 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Oscurlo\ComponentRenderer;
 
 use Exception;
-use DOMDocument;
 
 class ComponentManager
 {
-    protected DOMDocument $dom;
     protected string $dom_version = "1.0";
     protected string $dom_encoding = "UTF-8";
     protected ?string $component_path = null;
     protected bool $component_path_is_defined = false;
-
-    public function __construct()
-    {
-        $this->dom = new DOMDocument(
-            $this->dom_version,
-            $this->dom_encoding
-        );
-    }
 
     /**
      * Set Path
@@ -87,7 +79,7 @@ class ComponentManager
         $method = $splt[1] ?? null;
 
         return [
-            "folder" => $dirname === "." ? null : str_replace("./", null, $dirname),
+            "folder" => $dirname === "." ? null : str_replace("./", "", $dirname),
             "component" => $function,
             "method" => $method
         ];
@@ -120,5 +112,28 @@ class ComponentManager
         }
 
         return $json;
+    }
+
+    protected function comment_component(string $html, array $components): string
+    {
+        return self::comment_or_uncomment("comment", $html, $components);
+    }
+    protected function uncomment_component(string $html, array $components): string
+    {
+        return self::comment_or_uncomment("uncomment", $html, $components);
+    }
+
+    private function comment_or_uncomment($action, $html, $components)
+    {
+        foreach ($components as $component) {
+            $html = str_ireplace(
+                ...[
+                    "comment" => [["<{$component}", "{$component}>"], ["<!-- <{$component}", "{$component}> -->"], $html],
+                    "uncomment" => [["<!-- <{$component}", "{$component}> -->"], ["<{$component}", "{$component}>"], $html]
+                ][$action]
+            );
+        }
+
+        return $html;
     }
 }

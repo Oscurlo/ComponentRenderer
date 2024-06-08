@@ -1,72 +1,53 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Oscurlo\ComponentRenderer;
 
+use DOMDocument;
+use DOMNode;
 use Exception;
 
 class ComponentExecutor extends ComponentManager
 {
-
     /**
      * Executing component
      * 
      * @param string $component
-     * @param string $html
-     * @return string
+     * @param array $attributes    
+     * @param DOMNode $tag
+     * 
+     * @throws Exception Component not found
      */
-    protected function execute_component(string $component, string $html): string
+    protected function execute_component(string $component, array $attributes, DOMNode $tag)
     {
         ["component" => $comp, "method" => $meth] = $this->split_component($component);
+        $dom = new DOMDocument;
+
         $function = $meth ? "{$comp}::{$meth}" : $comp;
 
-        if (($meth && !class_exists($comp)) || (!$meth && !function_exists($comp))) {
-            include $this->get_component_file($component);
-        }
+        if (($meth && !class_exists($comp)) || (!$meth && !function_exists($comp))) include $this->get_component_file($component);
 
-        $params = $this->get_params($html, $function);
+        $params = $attributes;
 
         if ($meth && class_exists($comp) && method_exists($comp, $meth)) {
-            return $comp::$meth($params);
+            $source = "<html><body>{$comp::$meth($params)}</body></html>";
+
+            if (!$dom->loadHTML($source, LIBXML_NOERROR)) throw new Exception("An error occurred while executing the class: {$function}");
         } else if (!$meth && function_exists($comp)) {
-            return $function($params);
-        }
+            $source = "<html><body>{$comp($params)}</body></html>";
 
-        throw new Exception("Component {$function} not found.");
-    }
-
-    /**
-     * Get Params
-     * 
-     * @param string $html
-     * @param string $component
-     * @return array
-     */
-    protected function get_params(string $html, string $component): array
-    {
-        $html = str_replace($component, "object", $html);
-
-        $attrs = [];
-
-        if ($this->dom->loadHTML($html, LIBXML_NOERROR)) {
-            $tag = $this->dom->getElementsByTagName("object")->item(0);
-
-            if ($tag) {
-                $attrs["children"] = "";
-                $attrs["textContent"] = $tag->textContent;
-
-                foreach ($tag->childNodes as $child) {
-                    $attrs["children"] .= $this->dom->saveHTML($child);
-                }
-
-                foreach ($tag->attributes as $attribute) {
-                    $attrs[$attribute->name] = $attribute->value;
-                }
-            }
-
+            if (!$dom->loadHTML($source, LIBXML_NOERROR)) throw new Exception("An error occurred while executing the function: {$function}");
         } else {
-            $attrs["failed"] = "error";
+            throw new Exception("Component {$function} not found.");
         }
 
-        return $attrs;
+        $node = $dom->getElementsByTagName("body")->item(0)->firstChild;
+
+        $importedNode = $tag->ownerDocument->importNode($node->cloneNode(true), true);
+
+        if (!$importedNode) throw new Exception("Failed to import node");
+
+        $tag->parentNode->replaceChild($importedNode, $tag);
     }
 }

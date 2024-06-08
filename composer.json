@@ -3,7 +3,7 @@
     "description": "Lector de componentes inspirado en JSX",
     "type": "library",
     "license": "MIT",
-    "version": "1.0",
+    "version": "1.0.0",
     "autoload": {
         "psr-4": {
             "Oscurlo\\ComponentRenderer\\": "src/"
