@@ -14,7 +14,14 @@ composer require oscurlo/component-renderer
 
 ## Uso
 
-> Los componentes reciben un arreglo que, por defecto, contiene el índice de children con el contenido dentro de la etiqueta.
+> El componente recibe un arreglo con todos los atributos enviados en la etiqueta por defecto recibe el children y el textContent
+
+```JSON
+{
+    "children": "Elementos.",
+    "textContent": "Texto.",
+}
+```
 
 ```php
 function MiComponente(array $main = []): string
