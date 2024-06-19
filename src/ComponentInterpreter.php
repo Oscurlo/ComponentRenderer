@@ -11,7 +11,10 @@ class ComponentInterpreter extends ComponentExecutor
 {
     protected function interpreter(string $html, array $components): string
     {
-        $dom = new DOMDocument;
+        $dom = new DOMDocument(
+            version: $this->dom_version,
+            encoding: $this->dom_encoding
+        );
         libxml_use_internal_errors(true);
 
         $componentsProcessed = true;

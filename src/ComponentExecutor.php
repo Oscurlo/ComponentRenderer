@@ -22,7 +22,10 @@ class ComponentExecutor extends ComponentManager
     protected function execute_component(string $component, array $attributes, DOMNode $tag)
     {
         ["component" => $comp, "method" => $meth] = $this->split_component($component);
-        $dom = new DOMDocument;
+        $dom = new DOMDocument(
+            version: $this->dom_version,
+            encoding: $this->dom_encoding
+        );
 
         $function = $meth ? "{$comp}::{$meth}" : $comp;
 

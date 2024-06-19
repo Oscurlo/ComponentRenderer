@@ -8,8 +8,8 @@ use Exception;
 
 class ComponentManager
 {
-    protected string $dom_version = "1.0";
-    protected string $dom_encoding = "UTF-8";
+    public string $dom_version = "1.0";
+    public string $dom_encoding = "UTF-8";
     protected ?string $component_path = null;
     protected bool $component_path_is_defined = false;
 
