@@ -34,11 +34,11 @@ class ComponentExecutor extends ComponentManager
         $params = $attributes;
 
         if ($meth && class_exists($comp) && method_exists($comp, $meth)) {
-            $source = "<html><body>{$comp::$meth($params)}</body></html>";
+            $source = "<html><meta charset=\"$this->dom_encoding\"><body>{$comp::$meth($params)}</body></html>";
 
             if (!$dom->loadHTML($source, LIBXML_NOERROR)) throw new Exception("An error occurred while executing the class: {$function}");
         } else if (!$meth && function_exists($comp)) {
-            $source = "<html><body>{$comp($params)}</body></html>";
+            $source = "<html><meta charset=\"$this->dom_encoding\"><body>{$comp($params)}</body></html>";
 
             if (!$dom->loadHTML($source, LIBXML_NOERROR)) throw new Exception("An error occurred while executing the function: {$function}");
         } else {

@@ -26,7 +26,7 @@ class ComponentInterpreter extends ComponentExecutor
 
                 $html = str_ireplace(["<{$function}", "{$function}>"], ["<object", "object>"], self::uncomment_component($html, [$component]));
 
-                if ($dom->loadHTML("<html><body>{$html}</body></html>", LIBXML_NOERROR)) {
+                if ($dom->loadHTML("<html><meta charset=\"$this->dom_encoding\"><body>{$html}</body></html>", LIBXML_NOERROR)) {
                     libxml_clear_errors();
 
                     $tags = $dom->getElementsByTagName("object");
