@@ -71,3 +71,6 @@ Si deseas contribuir a este proyecto, sigue estos pasos:
 - Realiza tus cambios y haz un commit (git commit -am 'Añadir nueva funcionalidad').
 - Envía tus cambios al repositorio remoto (git push origin nueva-rama).
 - Abre una Pull Request.
+
+Aunque no tenga relevancia, puede que a alguien le ayude mi proyecto y quiera darme algo de apoyo invitándome un café 
+[![Invítame un café](https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png)](https://www.buymeacoffee.com/oscurlo)
