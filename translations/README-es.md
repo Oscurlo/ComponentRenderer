@@ -8,9 +8,9 @@ ComponentRenderer es una librería PHP inspirada en JSX que permite leer y proce
 
 Puedes instalar esta librería usando Composer. Ejecuta el siguiente comando:
 
-bash
+```bash
 composer require oscurlo/component-renderer
-
+```
 
 ## Uso
 
