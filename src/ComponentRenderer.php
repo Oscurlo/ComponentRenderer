@@ -6,10 +6,15 @@ namespace Oscurlo\ComponentRenderer;
 
 final class ComponentRenderer extends ComponentBuffer
 {
-    public function __construct(?string $source = null)
+    /**
+     * For easier use, the construct also receives the folder where the components are located.
+     * 
+     * @param ?string $folder
+     */
+    public function __construct(?string $folder = null)
     {
-        if (!empty($source)) {
-            self::set_component_path($source);
+        if (!empty($folder)) {
+            self::set_component_path($folder);
         }
     }
 }

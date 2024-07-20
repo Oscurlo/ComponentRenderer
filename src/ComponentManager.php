@@ -22,9 +22,7 @@ class ComponentManager
      */
     public function set_component_path(string $source): void
     {
-        if (!is_dir($source)) {
-            throw new Exception("");
-        }
+        if (!is_dir($source)) throw new Exception("We couldn't find the folder");
 
         $this->component_path_is_defined = true;
         $this->component_path = rtrim($source, "/\\");
@@ -96,24 +94,6 @@ class ComponentManager
         return json_encode($value, JSON_UNESCAPED_UNICODE);
     }
 
-    /**
-     * chatgpt
-     * 
-     * https://chatgpt.com/share/e842aa8c-cb9c-43bf-bcee-b2667ebc3d49
-     * 
-     */
-
-    static function json_cleaned(string $json): string
-    {
-        $json = str_replace(['\\/', '\\r\\n', '\\'], ['/', ' ', ''], $json);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception('Error decodificando JSON: ' . json_last_error_msg());
-        }
-
-        return $json;
-    }
-
     protected function comment_component(string $html, array $components): string
     {
         return self::comment_or_uncomment("comment", $html, $components);
@@ -125,15 +105,39 @@ class ComponentManager
 
     private function comment_or_uncomment($action, $html, $components)
     {
+        $comment = fn ($tag) => ["<!-- <{$tag}", "</{$tag}> -->"];
+        $uncomment = fn ($tag) => ["<{$tag}", "</{$tag}>"];
+
         foreach ($components as $component) {
             $html = str_ireplace(
                 ...[
-                    "comment" => [["<{$component}", "</{$component}>"], ["<!-- <{$component}", "</{$component}> -->"], $html],
-                    "uncomment" => [["<!-- <{$component}", "</{$component}> -->"], ["<{$component}", "</{$component}>"], $html]
+                    "comment" => [$uncomment($component), $comment($component), $html],
+                    "uncomment" => [$comment($component), $uncomment($component), $html]
                 ][$action]
             );
         }
 
         return $html;
+    }
+
+    static function extract_attributes($main, $columns, $encoding = "UTF-8"): string
+    {
+        $attrs = [];
+        foreach ($main as $key => $value) {
+            if (in_array($key, $columns)) {
+                $attrs[] = "{$key}=\"" . htmlspecialchars($value, ENT_QUOTES, $encoding) . "\"";
+            }
+        }
+        return implode(" ", $attrs);
+    }
+
+    static function html_base($html, $encoding = "UTF-8"): string
+    {
+        return <<<HTML
+        <html>
+            <meta charset="{$encoding}">
+            <body>{$html}</body>
+        </html>
+        HTML;
     }
 }

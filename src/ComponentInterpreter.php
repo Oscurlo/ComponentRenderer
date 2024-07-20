@@ -9,6 +9,12 @@ use DOMNode;
 
 class ComponentInterpreter extends ComponentExecutor
 {
+    /**
+     * This method is responsible for searching for components within the html
+     * 
+     * @param string $html
+     * @param array $components
+     */
     protected function interpreter(string $html, array $components): string
     {
         $dom = new DOMDocument(
@@ -17,16 +23,23 @@ class ComponentInterpreter extends ComponentExecutor
         );
         libxml_use_internal_errors(true);
 
+        # A loop is executed that is responsible for searching for the components until they are completely processed in the html
         $componentsProcessed = true;
         while ($componentsProcessed) {
             $componentsProcessed = false;
+            # I loop to find each component.
             foreach ($components as $component) if (self::component_exists($component)) {
                 ["component" => $comp, "method" => $meth] = self::split_component($component);
                 $function = $meth ? "{$comp}::{$meth}" : $comp;
 
+                /**
+                 * The DOMDocument class is very strict and I can't get the tags as I receive them,
+                 * this gave me trouble for a while until I came up with this solution.
+                 * I simply rename the "Component -> Object" tag to a valid html element.
+                 */
                 $html = str_ireplace(["<{$function}", "{$function}>"], ["<object", "object>"], self::uncomment_component($html, [$component]));
 
-                if ($dom->loadHTML("<html><meta charset=\"$this->dom_encoding\"><body>{$html}</body></html>", LIBXML_NOERROR)) {
+                if ($dom->loadHTML(self::html_base($html, $this->dom_encoding), LIBXML_NOERROR)) {
                     libxml_clear_errors();
 
                     $tags = $dom->getElementsByTagName("object");

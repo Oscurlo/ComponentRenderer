@@ -6,7 +6,7 @@ use Oscurlo\ComponentRenderer\ComponentRenderer;
 include "../vendor/autoload.php";
 
 $ComponentRenderer = new ComponentRenderer(
-    source: "./components/"
+    folder: "./components/"
 );
 
 ?>

@@ -16,15 +16,13 @@ class ComponentBuffer extends ComponentInterpreter
      */
     public function start(string|array $components): void
     {
-        if (!$this->component_path_is_defined) {
-            throw new Exception("Path for components is not defined.");
-        }
+        if (!$this->component_path_is_defined) throw new Exception("The components folder is not defined");
 
-        if (!is_array($components)) {
-            $components = [$components];
-        }
+        # To avoid validations I validate if it is not an array and convert it
+        if (!is_array($components)) $components = [$components];
 
         ob_start(fn ($content) => self::interpreter(
+            # To avoid problems with reading the html, I commented all the received components.
             self::comment_component(
                 $content,
                 $components
