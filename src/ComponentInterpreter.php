@@ -37,7 +37,7 @@ class ComponentInterpreter extends ComponentExecutor
                  * this gave me trouble for a while until I came up with this solution.
                  * I simply rename the "Component -> Object" tag to a valid html element.
                  */
-                $html = str_ireplace(["<{$function}", "{$function}>"], ["<object", "object>"], self::uncomment_component($html, [$component]));
+                $html = str_replace(["<{$function}", "{$function}>"], ["<object", "object>"], self::uncomment_component($html, [$component]));
 
                 if ($dom->loadHTML(self::html_base($html, $this->dom_encoding), LIBXML_NOERROR)) {
                     libxml_clear_errors();
@@ -59,7 +59,7 @@ class ComponentInterpreter extends ComponentExecutor
                     }
                 }
 
-                $html = str_ireplace(["<object", "object>"], ["<{$function}", "{$function}>"], self::comment_component($html, [$component]));
+                $html = str_replace(["<object", "object>"], ["<{$function}", "{$function}>"], self::comment_component($html, [$component]));
             }
         }
 
