@@ -51,7 +51,11 @@ class ComponentInterpreter extends ComponentExecutor
 
                     foreach ($tagsList as $tag) {
                         self::execute_component($component, self::get_params($tag, $dom), $tag);
-                        $html = $dom->saveHTML();
+                        $html = self::get_body(
+                            $dom->saveHTML(),
+                            $this->dom_version,
+                            $this->dom_encoding
+                        );
                     }
                 }
 
@@ -62,6 +66,12 @@ class ComponentInterpreter extends ComponentExecutor
         return $html;
     }
 
+    /**
+     * Gets the attributes of the component
+     * 
+     * @param DOMNode $tag
+     * @param DOMDocument $doms
+     */
     protected function get_params(DOMNode $tag, DOMDocument $dom): array
     {
         $attrs = [];
