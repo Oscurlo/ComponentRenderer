@@ -147,11 +147,13 @@ class ComponentManager
      */
     private function comment_or_uncomment(string $action, string $html, array $components): string
     {
-        $comment = fn ($tag) => ["<!-- <{$tag}", "</{$tag}> -->"];
-        $uncomment = fn ($tag) => ["<{$tag}", "</{$tag}>"];
+        $comment = fn($tag) => ["<!-- <{$tag}", "</{$tag}> -->"];
+        $uncomment = fn($tag) => ["<{$tag}", "</{$tag}>"];
 
         foreach ($components as $component) {
-            $html = str_ireplace(
+            if ($action === "comment" && strpos($html, $comment($component)[0]) !== false) continue;
+
+            $html = str_replace(
                 ...[
                     "comment" => [$uncomment($component), $comment($component), $html],
                     "uncomment" => [$comment($component), $uncomment($component), $html]

@@ -25,6 +25,7 @@ class ComponentInterpreter extends ComponentExecutor
 
         # A loop is executed that is responsible for searching for the components until they are completely processed in the html
         $componentsProcessed = true;
+
         while ($componentsProcessed) {
             $componentsProcessed = false;
             # I loop to find each component.

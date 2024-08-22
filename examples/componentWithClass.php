@@ -2,7 +2,6 @@
 
 use Oscurlo\ComponentRenderer\ComponentRenderer;
 
-
 include "../vendor/autoload.php";
 
 $ComponentRenderer = new ComponentRenderer(
@@ -10,6 +9,7 @@ $ComponentRenderer = new ComponentRenderer(
 );
 
 # Example with bootstrap 5.3.3: https://getbootstrap.com/
+
 
 ?>
 

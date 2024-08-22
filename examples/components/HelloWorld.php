@@ -16,5 +16,9 @@ function HelloWorld(array $main = []): string
 
     return <<<HTML
     <p>{$msg}</p>
+    
+    <p>
+        Lorem, ipsum dolor.
+    </p>
     HTML;
 }

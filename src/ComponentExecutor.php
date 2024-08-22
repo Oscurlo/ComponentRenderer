@@ -31,25 +31,32 @@ class ComponentExecutor extends ComponentManager
 
         if (($meth && !class_exists($comp)) || (!$meth && !function_exists($comp))) include $this->get_component_file($component);
 
-        $params = $attributes;
-
         if ($meth && class_exists($comp) && method_exists($comp, $meth)) {
-            $source = self::html_base($comp::$meth($params), $this->dom_encoding);
+            $source = self::html_base($comp::$meth($attributes), $this->dom_encoding);
             if (!$dom->loadHTML($source, LIBXML_NOERROR)) throw new Exception("An error occurred while executing the class: {$function}");
         } else if (!$meth && function_exists($comp)) {
-            $source = self::html_base($comp($params), $this->dom_encoding);
+            $source = self::html_base($comp($attributes), $this->dom_encoding);
 
             if (!$dom->loadHTML($source, LIBXML_NOERROR)) throw new Exception("An error occurred while executing the function: {$function}");
         } else {
             throw new Exception("Component {$function} not found.");
         }
 
-        $node = $dom->getElementsByTagName("body")->item(0)->firstChild;
+        // $node = $dom->getElementsByTagName("body")->item(0)->firstChild;
+        $body = $dom->getElementsByTagName("body")->item(0);
 
-        $importedNode = $tag->ownerDocument->importNode($node->cloneNode(true), true);
+        if (!$body) throw new Exception("No body tag found in the component's HTML");
 
-        if (!$importedNode) throw new Exception("Failed to import node");
+        // $importedNode = $tag->ownerDocument->importNode($node->cloneNode(true), true);
+        $importedNodes = [];
+        foreach ($body->childNodes as $child) $importedNodes[] = $tag->ownerDocument->importNode($child->cloneNode(true), true);
 
-        $tag->parentNode->replaceChild($importedNode, $tag);
+        foreach ($importedNodes as $importedNode) $tag->parentNode->insertBefore($importedNode, $tag);
+
+        $tag->parentNode->removeChild($tag);
+
+        // if (!$importedNode) throw new Exception("Failed to import node");
+
+        // $tag->parentNode->replaceChild($importedNode, $tag);
     }
 }

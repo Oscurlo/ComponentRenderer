@@ -21,7 +21,7 @@ class ComponentBuffer extends ComponentInterpreter
         # To avoid validations I validate if it is not an array and convert it
         if (!is_array($components)) $components = [$components];
 
-        ob_start(fn ($content) => self::interpreter(
+        ob_start(fn($content) => self::interpreter(
             # To avoid problems with reading the html, I commented all the received components.
             self::comment_component(
                 $content,

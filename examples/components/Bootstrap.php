@@ -1,5 +1,6 @@
-<?php declare(strict_types=1);
-use Oscurlo\ComponentRenderer\ComponentRenderer;
+<?php
+
+declare(strict_types=1);
 
 # This's a regular example
 
@@ -39,12 +40,12 @@ class Bootstrap
         $newAccordion = fn(array $info, int $index, int $chekIndex = 0) => <<<HTML
         <div class="accordion-item">
             <h2 class="accordion-header">
-                <button class="accordion-button {$inCheck($index === $chekIndex, '', 'collapsed')}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{$encode('$index')}"
-                    aria-expanded="{$inCheck($index === $chekIndex, 'true', 'false')}" aria-controls="collapse{$encode('$index')}">
+                <button class="accordion-button {$inCheck($index ===$chekIndex, '', 'collapsed')}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{$encode('$index')}"
+                    aria-expanded="{$inCheck($index ===$chekIndex, 'true', 'false')}" aria-controls="collapse{$encode('$index')}">
                     {$info["title"]}
                 </button>
             </h2>
-            <div id="collapse{$encode('$index')}" class="accordion-collapse collapse {$inCheck($index === $chekIndex, 'show', '')}" data-bs-parent="#{$id}">
+            <div id="collapse{$encode('$index')}" class="accordion-collapse collapse {$inCheck($index ===$chekIndex, 'show', '')}" data-bs-parent="#{$id}">
                 <div class="accordion-body">
                     {$info["body"]}
                 </div>
@@ -58,6 +59,10 @@ class Bootstrap
         return <<<HTML
         <div class="accordion" id="{$id}">
             {$result}
+        </div>
+
+        <div>
+            Lorem, ipsum dolor.
         </div>
         HTML;
     }
