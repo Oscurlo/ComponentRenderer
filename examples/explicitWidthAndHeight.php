@@ -5,7 +5,9 @@ use Oscurlo\ComponentRenderer\ComponentRenderer;
 include "../vendor/autoload.php";
 
 $ComponentRenderer = new ComponentRenderer(
-    folder: "./components/"
+    [
+        __DIR__ . "/components" => "Image"
+    ]
 );
 
 # Example with bootstrap 5.3.3: https://getbootstrap.com/
@@ -26,7 +28,7 @@ $pre = fn(mixed $value) => "<pre>" . json_encode($value, JSON_UNESCAPED_UNICODE 
 </head>
 
 <body class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-    <?php $ComponentRenderer->start("Image") ?>
+    <?php $ComponentRenderer->start() ?>
     <div class="container">
         <div class="row">
             <div class="col-12">

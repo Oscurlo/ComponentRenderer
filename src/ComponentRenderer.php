@@ -9,12 +9,10 @@ final class ComponentRenderer extends ComponentBuffer
     /**
      * For easier use, the construct also receives the folder where the components are located.
      * 
-     * @param ?string $folder
+     * @param ?array $folder
      */
-    public function __construct(?string $folder = null)
+    public function __construct(?array $folder = null)
     {
-        if (!empty($folder)) {
-            self::set_component_path($folder);
-        }
+        if (!empty($folder)) self::set_component_manager($folder);
     }
 }

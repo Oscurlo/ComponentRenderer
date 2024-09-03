@@ -5,7 +5,7 @@
 /**
  * Componente de prueba: Este componente es mas par ayudar un poco al SEO agregando el ancho y alto a las imagees
  * 
- * @param array $main contiene valores que requiere el componente
+ * @param object $main contiene valores que requiere el componente
  * 
  * @return string Retorna el html
  */
@@ -14,16 +14,16 @@ declare(strict_types=1);
 
 use Oscurlo\ComponentRenderer\ComponentManager;
 
-function Image(array $main): string
+function Image(object $main): string
 {
     @[
         "src" => $src
-    ] = $main;
+    ] = (array)$main;
 
     $attrs = ComponentManager::extract_attributes(
-        $main,
+        (array)$main,
         array_filter(
-            array_keys($main),
+            array_keys((array)$main),
             fn($col) => !in_array($col, ["children", "textContent"])
         )
     );

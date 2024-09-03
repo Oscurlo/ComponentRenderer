@@ -6,12 +6,12 @@ declare(strict_types=1);
 
 class Bootstrap
 {
-    static function card(array $main = []): string
+    static function card(object $main): string
     {
         [
             "children" => $children,
             "title" => $title
-        ] = $main;
+        ] = (array)$main;
 
         return <<<HTML
         <div class="card">
@@ -21,14 +21,14 @@ class Bootstrap
         HTML;
     }
 
-    static function accordion(array $main = []): string
+    static function accordion(object $main): string
     {
         [
             "children" => $children,
             "textContent" => $textContent,
             "id" => $id,
             "index-collapse" => $indexCollapse
-        ] = $main;
+        ] = (array)$main;
 
         $result = "";
 

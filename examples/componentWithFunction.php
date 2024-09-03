@@ -5,7 +5,9 @@ use Oscurlo\ComponentRenderer\ComponentRenderer;
 include "../vendor/autoload.php";
 
 $ComponentRenderer = new ComponentRenderer(
-    folder: "./components/"
+    [
+        __DIR__ . "/components" => "HelloWorld"
+    ]
 );
 
 ?>
@@ -20,7 +22,7 @@ $ComponentRenderer = new ComponentRenderer(
 </head>
 
 <body>
-    <?php $ComponentRenderer->start("HelloWorld") ?>
+    <?php $ComponentRenderer->start() ?>
     <HelloWorld></HelloWorld>
     <HelloWorld>Hola <b>wenas</b></HelloWorld>
     <?php $ComponentRenderer->end() ?>

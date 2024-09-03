@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Oscurlo\ComponentRenderer;
 
 use DOMDocument;
+use DOMNode;
 use DOMXPath;
 use Exception;
 
@@ -23,12 +24,12 @@ class ComponentManager
     /**
      * Component path
      */
-    protected ?string $component_path = null;
+    protected ?array $component_folders = null;
 
     /**
-     * Indicates if the component path is defined
+     * Valid random tag for html
      */
-    protected bool $component_path_is_defined = false;
+    protected string $tag = "object";
 
     /**
      * Set the component path
@@ -37,14 +38,24 @@ class ComponentManager
      * @throws Exception If the folder is not found
      * @return void
      */
-    public function set_component_path(string $source): void
+    public function set_component_manager(array $folders): void
     {
-        if (!is_dir($source)) {
-            throw new Exception("We couldn't find the folder");
-        }
-
-        $this->component_path_is_defined = true;
-        $this->component_path = rtrim($source, "/\\");
+        # { "folder": ["comp1", "comp2"] }
+        $this->component_folders = array_filter(
+            array_map(
+                fn(string $keys, string|array $values) => [
+                    rtrim(trim($keys), "/\\") => array_map(
+                        fn($val) => trim($val),
+                        array_unique(
+                            is_string($values) ? [$values] : $values
+                        )
+                    )
+                ],
+                array_keys($folders),
+                array_values($folders)
+            ),
+            fn(array $components) => !empty($components)
+        );
     }
 
     /**
@@ -54,7 +65,20 @@ class ComponentManager
      */
     public function get_component_path(): ?string
     {
-        return $this->component_path;
+        return $this->component_folders;
+    }
+
+    /**
+     * Replace the component with a valid HTML tag
+     * 
+     * @param string $tagFrom
+     * @param string $tagTo
+     * @param string $html
+     * @return string
+     */
+    protected static function replace_tag(string $tagFrom, string $tagTo, string $html): string
+    {
+        return str_ireplace(["<{$tagFrom}", "{$tagFrom}>"], ["<{$tagTo}", "{$tagTo}>"], $html);
     }
 
     /**
@@ -63,23 +87,16 @@ class ComponentManager
      * @param string $component Component name
      * @return bool
      */
-    protected function component_exists(string $component): bool
+    protected function component_exists(string $folder, string $component): bool
     {
-        return file_exists($this->get_component_file($component));
+        return file_exists(self::get_file($folder, $component));
     }
 
-    /**
-     * Get the component file path
-     * 
-     * @param string $component Component name
-     * @return string
-     */
-    protected function get_component_file(string $component): string
+    protected function get_file(string $folder, string $component): string
     {
-        ["folder" => $folder, "component" => $file] = self::split_component($component);
-        $path = $this->get_component_path();
+        [$file] = explode("::", $component);
 
-        return $folder ? "{$path}/{$folder}/{$file}.php" : "{$path}/{$file}.php";
+        return "{$folder}/{$file}.php";
     }
 
     /**
@@ -111,6 +128,22 @@ class ComponentManager
     static function json_encode(array $value): bool|string
     {
         return json_encode($value, JSON_UNESCAPED_UNICODE);
+    }
+
+    /**
+     * Hace rato me pico un mosquito 😓
+     * 
+     * @param string $html
+     */
+    public function comment_all_components(string $html): string
+    {
+        foreach ($this->component_folders as $folders) {
+            foreach ($folders as $folder => $components) {
+                self::comment_component($html, $components);
+            }
+        }
+
+        return $html;
     }
 
     /**
@@ -225,6 +258,30 @@ class ComponentManager
             }
         }
 
-        return $bodyContent;
+        return $bodyContent ?? $html;
+    }
+
+    /**
+     * Gets the attributes of the component
+     * 
+     * @param DOMNode $tag
+     * @param DOMDocument $doms
+     */
+    protected function get_params(DOMNode $tag, DOMDocument $dom): object
+    {
+        $attrs = [];
+        $attrs["children"] = "";
+
+        foreach ($tag->attributes as $attr) $attrs[$attr->nodeName] = $attr->nodeValue;
+
+        if (!empty($tag->childNodes->count())) {
+            $attrs["children"] = "";
+
+            foreach ($tag->childNodes as $child) $attrs["children"] .= $dom->saveHTML($dom->importNode($child, true));
+        }
+
+        $attrs["textContent"] = $tag->textContent;
+
+        return (object)$attrs;
     }
 }
