@@ -39,11 +39,15 @@ require 'vendor/autoload.php';
 
 use Oscurlo\ComponentRenderer\ComponentRenderer;
 
-$gestor = new ComponentRenderer('/ruta/de/componentes');
+$gestor = new ComponentRenderer(
+    [
+        '/ruta/de/componentes' => 'MiComponente'
+    ]
+);
 
 // Apertura de lectura del búfer
 // start: recibe los componentes que debe procesar
-$gestor->start(['MiComponente']);
+$gestor->start();
 
 print <<<HTML
 <!-- Mensaje por defecto del componente -->

@@ -39,11 +39,15 @@ require 'vendor/autoload.php';
 
 use Oscurlo\ComponentRenderer\ComponentRenderer;
 
-$renderer = new ComponentRenderer('/path/to/components');
+$renderer = new ComponentRenderer(
+    [
+        '/path/to/components' => 'MyComponent'
+    ]
+);
 
 // Start output buffering
 // start: receives the components that it should process
-$renderer->start(['MyComponent']);
+$renderer->start();
 
 print <<<HTML
 <!-- Default message from the component -->
