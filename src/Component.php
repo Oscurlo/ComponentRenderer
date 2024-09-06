@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Oscurlo\ComponentRenderer;
 
-final class Component extends ComponentInterpreter
+final class Component extends ComponentInterpreter implements Rendering
 {
     public function render(string $html, ?array $components = null): string
     {

@@ -19,8 +19,9 @@ class ComponentExecutor extends ComponentManager
      * 
      * @throws Exception Component not found
      */
-    public function execute_component(string $folder, string $component, object $attributes, DOMNode $tag): void
+    public function execute_component(string $folder, string $component, object $attributes, DOMNode $tag, DOMDocument $domMain): void
     {
+
         $dom = new DOMDocument(
             version: $this->dom_version,
             encoding: $this->dom_encoding
@@ -28,24 +29,37 @@ class ComponentExecutor extends ComponentManager
 
         libxml_use_internal_errors(true);
 
-        @[$classname, $method] = explode("::", $component);
+        $is_a = match (true) {
+            strpos($component, "::") !== false => "method_static",
+                // strpos($component, "->") !== false => "method_public",
+            default => "function",
+        };
+
+        @[$classname, $method] = explode(strpos($component, "::") !== false ? "::" : "->", $component);
 
         if (!function_exists($classname) || !class_exists($classname)) include_once self::get_file($folder, $component);
 
         if (function_exists($classname) || class_exists($classname) && method_exists($classname, (string)$method)) {
 
-            // $source = call_user_func($component, $attributes);
-            $source = $method ? $classname::$method($attributes) : $classname($attributes);
+            $source = match ($is_a) {
+                "method_static" => $classname::$method($attributes),
+                // "method_public" => (new $classname)->$method($attributes),
+                "function" => $classname($attributes),
+            };
 
+            // if (empty($source)) new Exception("No valid empty value");
 
-            if (empty($source)) new Exception("No valid empty value");
+            $contains_html_base = self::contains_html_base($source);
 
-            $contains_html = strpos($source, "<html") !== false;
+            if ($contains_html_base) {
+                $this->contains_html = true;
+                $domMain->loadHTML($source, LIBXML_NOERROR);
+                return;
+            }
 
-            if (!$dom->loadHTML($contains_html ? $source : self::html_base($source), LIBXML_NOERROR))
-                throw new Exception("Error Processing Request");
+            if (!$dom->loadHTML(self::html_base($source, $this->dom_encoding), LIBXML_NOERROR)) throw new Exception("Error Processing Request");
 
-            $body = $dom->getElementsByTagName($contains_html ? "*" : "body")->item(0);
+            $body = $dom->getElementsByTagName("body")->item(0);
 
             if (!$body) throw new Exception("No body tag found in the component's HTML");
 

@@ -31,6 +31,8 @@ class ComponentManager
      */
     protected string $tag = "object";
 
+    protected bool $contains_html = false;
+
     /**
      * Set the component path
      * 
@@ -94,6 +96,7 @@ class ComponentManager
 
     protected function get_file(string $folder, string $component): string
     {
+        # Debo re-hacer las funciones en la use "[explode -> ::]"
         [$file] = explode("::", $component);
 
         return "{$folder}/{$file}.php";
@@ -130,71 +133,26 @@ class ComponentManager
         return json_encode($value, JSON_UNESCAPED_UNICODE);
     }
 
-    /**
-     * Hace rato me pico un mosquito 😓
-     * 
-     * @param string $html
-     */
-    public function comment_all_components(string $html): string
+    public function convert_to_valid_tag(string $html): string
     {
+        $oc = fn($tag) => ["<{$tag}", "</{$tag}"];
         foreach ($this->component_folders as $folders) {
             foreach ($folders as $folder => $components) {
-                self::comment_component($html, $components);
+                foreach ($components as $component) {
+                    $html = str_replace($oc($component), $oc(self::valid_tag($component)), $html);
+                }
             }
         }
 
         return $html;
     }
 
-    /**
-     * Comment out HTML components
-     * 
-     * @param string $html HTML content
-     * @param array $components Components to comment out
-     * @return string
-     */
-    protected function comment_component(string $html, array $components): string
+    public function valid_tag(string $component): string
     {
-        return self::comment_or_uncomment("comment", $html, $components);
-    }
+        $n = "component-";
+        $n .= strtolower(str_replace(["::", $n], ["-", ""], $component));
 
-    /**
-     * Uncomment HTML components
-     * 
-     * @param string $html HTML content
-     * @param array $components Components to uncomment
-     * @return string
-     */
-    protected function uncomment_component(string $html, array $components): string
-    {
-        return self::comment_or_uncomment("uncomment", $html, $components);
-    }
-
-    /**
-     * Comment or uncomment HTML components
-     * 
-     * @param string $action Action to perform ("comment" or "uncomment")
-     * @param string $html HTML content
-     * @param array $components Components to process
-     * @return string
-     */
-    private function comment_or_uncomment(string $action, string $html, array $components): string
-    {
-        $comment = fn($tag) => ["<!-- <{$tag}", "</{$tag}> -->"];
-        $uncomment = fn($tag) => ["<{$tag}", "</{$tag}>"];
-
-        foreach ($components as $component) {
-            if ($action === "comment" && strpos($html, $comment($component)[0]) !== false) continue;
-
-            $html = str_replace(
-                ...[
-                    "comment" => [$uncomment($component), $comment($component), $html],
-                    "uncomment" => [$comment($component), $uncomment($component), $html]
-                ][$action]
-            );
-        }
-
-        return $html;
+        return $n;
     }
 
     /**
@@ -283,5 +241,13 @@ class ComponentManager
         $attrs["textContent"] = $tag->textContent;
 
         return (object)$attrs;
+    }
+
+    /**
+     * 
+     */
+    protected function contains_html_base(string $html): bool
+    {
+        return preg_match("|<html(.*?)</html>|s", $html) ? true : false;
     }
 }
