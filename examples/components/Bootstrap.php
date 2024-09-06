@@ -2,33 +2,36 @@
 
 declare(strict_types=1);
 
+use Oscurlo\ComponentRenderer\Component;
+
 # This's a regular example
 
 class Bootstrap
 {
-    static function card(object $main): string
+    static function card(object $prop): string
     {
-        [
-            "children" => $children,
-            "title" => $title
-        ] = (array)$main;
+        $components = [
+            dirname(__DIR__) . "/Logic" => "YES"
+        ];
 
-        return <<<HTML
+        return (new Component)->render(<<<HTML
         <div class="card">
-            <div class="card-header">{$title}</div>
-            <div class="card-body">{$children}</div>
+            <YES condition="{$prop->title}"><div class="card-header">{$prop->title}</div></YES>
+            <div class="card-body">{$prop->children}</div>
+            <YES condition="{$prop->footer}"><div class="card-footer">{$prop->footer}</div></YES>
         </div>
-        HTML;
+        HTML, $components);
     }
 
-    static function accordion(object $main): string
+    static function accordion(object $prop): string
     {
         [
-            "children" => $children,
-            "textContent" => $textContent,
             "id" => $id,
+            "textContent" => $textContent,
             "index-collapse" => $indexCollapse
-        ] = (array)$main;
+        ] = (array)$prop;
+
+        if (!$id) throw new Exception("ID is required");
 
         $result = "";
 
@@ -36,6 +39,8 @@ class Bootstrap
         $encode = fn(string $string) => base64_encode($string);
 
         $jsonData = json_decode($textContent, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) throw new Exception("JSON no is valid");
 
         $newAccordion = fn(array $info, int $index, int $chekIndex = 0) => <<<HTML
         <div class="accordion-item">
@@ -59,10 +64,6 @@ class Bootstrap
         return <<<HTML
         <div class="accordion" id="{$id}">
             {$result}
-        </div>
-
-        <div>
-            Lorem, ipsum dolor.
         </div>
         HTML;
     }
