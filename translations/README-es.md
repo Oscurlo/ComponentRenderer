@@ -39,6 +39,7 @@ require 'vendor/autoload.php';
 
 use Oscurlo\ComponentRenderer\ComponentRenderer;
 
+// Recibe los componentes que debe procesar
 $gestor = new ComponentRenderer(
     [
         '/ruta/de/componentes' => 'MiComponente'
@@ -46,12 +47,11 @@ $gestor = new ComponentRenderer(
 );
 
 // Apertura de lectura del búfer
-// start: recibe los componentes que debe procesar
 $gestor->start();
 
 print <<<HTML
 <!-- Mensaje por defecto del componente -->
-<MiComponente></MiComponente>
+<MiComponente>Satoru gojo no esta muerto</MiComponente>
 <!-- Mensaje personalizado -->
 <MiComponente>Si está muerto y punto :(</MiComponente>
 HTML;

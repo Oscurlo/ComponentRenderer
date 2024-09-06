@@ -39,6 +39,7 @@ require 'vendor/autoload.php';
 
 use Oscurlo\ComponentRenderer\ComponentRenderer;
 
+// Receives the components that it should process
 $renderer = new ComponentRenderer(
     [
         '/path/to/components' => 'MyComponent'
@@ -46,12 +47,11 @@ $renderer = new ComponentRenderer(
 );
 
 // Start output buffering
-// start: receives the components that it should process
 $renderer->start();
 
 print <<<HTML
 <!-- Default message from the component -->
-<MyComponent></MyComponent>
+<MyComponent>Satoru gojo no is dead</MyComponent>
 <!-- Custom message -->
 <MyComponent>He is dead, period :(</MyComponent>
 HTML;
