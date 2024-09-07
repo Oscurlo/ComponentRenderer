@@ -63,9 +63,9 @@ class ComponentManager
     /**
      * Get the component path
      * 
-     * @return string|null
+     * @return array|null
      */
-    public function get_component_path(): ?string
+    public function get_component_path(): ?array
     {
         return $this->component_folders;
     }
@@ -136,7 +136,7 @@ class ComponentManager
     public function convert_to_valid_tag(string $html): string
     {
         $oc = fn($tag) => ["<{$tag}", "</{$tag}"];
-        foreach ($this->component_folders as $folders) {
+        if ($this->component_folders) foreach ($this->component_folders as $folders) {
             foreach ($folders as $folder => $components) {
                 foreach ($components as $component) {
                     $html = str_replace($oc($component), $oc(self::valid_tag($component)), $html);
