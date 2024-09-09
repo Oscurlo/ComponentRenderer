@@ -16,6 +16,7 @@ class ComponentInterpreter extends ComponentExecutor
      */
     public function interpreter(string $html): string
     {
+        if (is_null($this->component_folders)) return $html;
 
         $dom = new DOMDocument(
             version: $this->dom_version,

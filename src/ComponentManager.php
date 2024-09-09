@@ -150,6 +150,8 @@ class ComponentManager
     public function valid_tag(string $component): string
     {
         $n = "component-";
+        if (strpos($component, $n)) return $component;
+
         $n .= strtolower(str_replace(["::", $n], ["-", ""], $component));
 
         return $n;
