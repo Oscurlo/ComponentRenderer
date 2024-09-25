@@ -9,7 +9,7 @@ use DOMNode;
 use DOMXPath;
 use Exception;
 
-class ComponentManager
+class ComponentManager extends ComponentInterface
 {
     /**
      * DOM version
@@ -246,7 +246,10 @@ class ComponentManager
     }
 
     /**
+     * Validate if it contains html
      * 
+     * @param string $html
+     * @return false
      */
     protected function contains_html_base(string $html): bool
     {
