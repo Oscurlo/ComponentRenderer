@@ -23,6 +23,9 @@ class ComponentInterpreter extends ComponentExecutor
             encoding: $this->dom_encoding
         );
 
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+
         libxml_use_internal_errors(true);
 
         $contains_html_base = self::contains_html_base($html);
