@@ -14,7 +14,10 @@ class Bootstrap
             dirname(__DIR__) . "/Logic" => "YES"
         ];
 
-        return (new Component)->render(<<<HTML
+        $prop->title ??= false;
+        $prop->footer ??= false;
+
+        return Component::render(<<<HTML
         <div class="card">
             <YES condition="{$prop->title}"><div class="card-header">{$prop->title}</div></YES>
             <div class="card-body">{$prop->children}</div>
@@ -58,8 +61,7 @@ class Bootstrap
         </div>
         HTML;
 
-        foreach ($jsonData as $i => $data)
-            $result .= $newAccordion($data, $i, (int) $indexCollapse) ?: 0;
+        foreach ($jsonData as $i => $data) $result .= $newAccordion($data, $i, (int) $indexCollapse) ?: 0;
 
         return <<<HTML
         <div class="accordion" id="{$id}">

@@ -6,6 +6,7 @@ include "../vendor/autoload.php";
 
 $render = new ComponentRenderer(
     [
+        # Components
         __DIR__ . "/components" => "HelloWorld"
     ]
 );

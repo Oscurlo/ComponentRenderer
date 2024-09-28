@@ -9,7 +9,7 @@ include "../vendor/autoload.php";
 $render = new ComponentRenderer(
     [
         # Layouts
-        __DIR__ . "/Layouts" => ["Layout::system"],
+        __DIR__ . "/Layouts" => "Layout::system",
         # Components
         __DIR__ . "/components" => ["Bootstrap::accordion", "Bootstrap::card"]
     ]
@@ -45,7 +45,9 @@ $items = $render::json_encode(
 
 $now = "<time>" . date("l jS \of F Y h:i:s A") . "</time>";
 
-$render->start()->print(<<<HTML
+$render->start();
+
+echo <<<XML
 <Layout::system>
     <div class="container mt-5">
         <Bootstrap::card footer="{$now}">
@@ -55,4 +57,6 @@ $render->start()->print(<<<HTML
         </Bootstrap::card>
     </div>
 </Layout::system>
-HTML)->end();
+XML;
+
+$render->end();
