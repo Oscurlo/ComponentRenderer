@@ -12,6 +12,11 @@ use Exception;
 class ComponentManager extends ComponentInterface
 {
     /**
+     * DOM
+     */
+    public DOMDocument $dom;
+
+    /**
      * DOM version
      */
     public string $dom_version = "1.0";
@@ -27,10 +32,9 @@ class ComponentManager extends ComponentInterface
     protected ?array $component_folders = null;
 
     /**
-     * Valid random tag for html
+     * Validates if it contains the html tag and does not need to load a base content
+     * I created this variable, for example, to load layouts.
      */
-    protected string $tag = "object";
-
     protected bool $contains_html = false;
 
     /**
@@ -40,7 +44,20 @@ class ComponentManager extends ComponentInterface
      * @throws Exception If the folder is not found
      * @return void
      */
-    public function set_component_manager(array $folders): void
+
+    public function __construct()
+    {
+        $this->dom = new DOMDocument(
+            version: $this->dom_version,
+            encoding: $this->dom_encoding
+        );
+
+        # https://www.php.net/manual/en/class.domdocument.php
+        $this->dom->preserveWhiteSpace = false; # Remove redundant white space
+        $this->dom->formatOutput = true; # Output formats with indentation and extra space.
+    }
+
+    public function set_component_manager(array $components): void
     {
         # { "folder": ["comp1", "comp2"] }
         $this->component_folders = array_filter(
@@ -53,8 +70,8 @@ class ComponentManager extends ComponentInterface
                         )
                     )
                 ],
-                array_keys($folders),
-                array_values($folders)
+                array_keys($components),
+                array_values($components)
             ),
             fn(array $components) => !empty($components)
         );
@@ -68,19 +85,6 @@ class ComponentManager extends ComponentInterface
     public function get_component_path(): ?array
     {
         return $this->component_folders;
-    }
-
-    /**
-     * Replace the component with a valid HTML tag
-     * 
-     * @param string $tagFrom
-     * @param string $tagTo
-     * @param string $html
-     * @return string
-     */
-    protected static function replace_tag(string $tagFrom, string $tagTo, string $html): string
-    {
-        return str_ireplace(["<{$tagFrom}", "{$tagFrom}>"], ["<{$tagTo}", "{$tagTo}>"], $html);
     }
 
     /**
@@ -103,26 +107,6 @@ class ComponentManager extends ComponentInterface
     }
 
     /**
-     * Split the component into folder and component name
-     * 
-     * @param string $component Component name
-     * @return array
-     */
-    protected function split_component(string $component): array
-    {
-        [$dirname, $basename] = [dirname($component), basename($component)];
-        $splt = explode("::", $basename);
-        $function = $splt[0] ?? null;
-        $method = $splt[1] ?? null;
-
-        return [
-            "folder" => $dirname === "." ? null : str_replace("./", "", $dirname),
-            "component" => $function,
-            "method" => $method
-        ];
-    }
-
-    /**
      * Encode an array to JSON
      * 
      * @param array $value Array to encode
@@ -136,13 +120,10 @@ class ComponentManager extends ComponentInterface
     public function convert_to_valid_tag(string $html): string
     {
         $oc = fn($tag) => ["<{$tag}", "</{$tag}"];
-        if ($this->component_folders) foreach ($this->component_folders as $folders) {
-            foreach ($folders as $folder => $components) {
-                foreach ($components as $component) {
-                    $html = str_replace($oc($component), $oc(self::valid_tag($component)), $html);
-                }
-            }
-        }
+
+        if ($this->component_folders) foreach ($this->component_folders as $folders)
+            foreach ($folders as $folder => $components) foreach ($components as $component)
+                $html = str_replace($oc($component), $oc(self::valid_tag($component)), $html);
 
         return $html;
     }
@@ -150,9 +131,10 @@ class ComponentManager extends ComponentInterface
     public function valid_tag(string $component): string
     {
         $n = "component-";
+
         if (strpos($component, $n)) return $component;
 
-        $n .= strtolower(str_replace(["::", $n], ["-", ""], $component));
+        $n .= strtolower(str_replace("::", "-", $component));
 
         return $n;
     }
@@ -227,7 +209,7 @@ class ComponentManager extends ComponentInterface
      * @param DOMNode $tag
      * @param DOMDocument $doms
      */
-    protected function get_params(DOMNode $tag, DOMDocument $dom): object
+    protected function get_params(DOMNode $tag): object
     {
         $attrs = [];
         $attrs["children"] = "";
@@ -237,7 +219,7 @@ class ComponentManager extends ComponentInterface
         if (!empty($tag->childNodes->count())) {
             $attrs["children"] = "";
 
-            foreach ($tag->childNodes as $child) $attrs["children"] .= $dom->saveHTML($dom->importNode($child, true));
+            foreach ($tag->childNodes as $child) $attrs["children"] .= $this->dom->saveHTML($this->dom->importNode($child, true));
         }
 
         $attrs["textContent"] = $tag->textContent;
@@ -254,5 +236,13 @@ class ComponentManager extends ComponentInterface
     protected function contains_html_base(string $html): bool
     {
         return preg_match("|<html(.*?)</html>|s", $html) ? true : false;
+    }
+
+    /**
+     * Print 😅
+     */
+    protected function print(string ...$string): void
+    {
+        echo implode(" ", $string);
     }
 }

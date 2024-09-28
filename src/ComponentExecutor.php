@@ -19,7 +19,7 @@ class ComponentExecutor extends ComponentManager
      * 
      * @throws Exception Component not found
      */
-    public function execute_component(string $folder, string $component, object $attributes, DOMNode $tag, DOMDocument $domMain): void
+    public function execute_component(string $folder, string $component, object $attributes, DOMNode $tag): void
     {
 
         $dom = new DOMDocument(
@@ -53,7 +53,7 @@ class ComponentExecutor extends ComponentManager
 
             if ($contains_html_base) {
                 $this->contains_html = true;
-                $domMain->loadHTML($source, LIBXML_NOERROR);
+                $this->dom->loadHTML($source, LIBXML_NOERROR);
                 return;
             }
 

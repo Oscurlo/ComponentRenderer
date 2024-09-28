@@ -16,43 +16,58 @@ class ComponentInterpreter extends ComponentExecutor
      */
     public function interpreter(string $html): string
     {
-        if (is_null($this->component_folders)) return $html;
+        if (empty($this->component_folders)) return $html;
 
-        $dom = new DOMDocument(
-            version: $this->dom_version,
-            encoding: $this->dom_encoding
-        );
+        if (!$this->dom instanceof DOMDocument) $this->dom = new DOMDocument($this->dom_version, $this->dom_encoding);
 
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = true;
-
-        libxml_use_internal_errors(true);
+        $previousErrorSetting = libxml_use_internal_errors(true);
 
         $contains_html_base = self::contains_html_base($html);
 
         if ($contains_html_base) $this->contains_html = true;
 
         $html = self::convert_to_valid_tag($html);
+        $domLoaded = $this->dom->loadHTML($contains_html_base ? $html : self::html_base($html, $this->dom_encoding), LIBXML_NOERROR);
 
-        if ($dom->loadHTML($contains_html_base ? $html : self::html_base($html, $this->dom_encoding), LIBXML_NOERROR)) {
-            foreach ($this->component_folders as $folders) {
-                foreach ($folders as $folder => $components) {
-                    foreach ($components as $component) {
-                        if (self::component_exists($folder, $component)) {
+        if ($domLoaded) foreach ($this->component_folders as $folders) self::processFolders($folders);
 
-                            $tagsList = [];
+        libxml_use_internal_errors($previousErrorSetting);
 
-                            $tags = $dom->getElementsByTagName(self::valid_tag($component));
+        return $this->contains_html ? $this->dom->saveHTML() : self::get_body($this->dom->saveHTML());
+    }
 
-                            foreach ($tags as $tag) $tagsList[] = $tag;
+    private function processFolders(array $folders): void
+    {
+        foreach ($folders as $folder => $components)
+            if (is_string($folder) && is_array($components))
+                foreach ($components as $component)
+                    if (is_string($component) || is_array($component))
+                        self::processComponent($folder, $component);
+    }
 
-                            foreach ($tagsList as $tag) self::execute_component($folder, $component, self::get_params($tag, $dom), $tag, $dom);
-                        }
-                    }
-                }
-            }
-        }
+    /**
+     * @param string $folder
+     * @param string $component
+     * @return array
+     */
+    private function processComponent(string $folder, string $component): void
+    {
+        if (self::component_exists($folder, $component))
+            foreach ($this->getTagsForComponent($component) as $tag)
+                self::execute_component($folder, $component, self::get_params($tag), $tag);
+    }
 
-        return $this->contains_html ? $dom->saveHTML() : self::get_body($dom->saveHTML());
+    /**
+     * @param string $component
+     * @return array
+     */
+    private function getTagsForComponent(string $component): array
+    {
+        $tagsList = [];
+        $tags = $this->dom->getElementsByTagName(self::valid_tag($component));
+
+        foreach ($tags as $tag) $tagsList[] = $tag;
+
+        return $tagsList;
     }
 }

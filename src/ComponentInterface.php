@@ -11,15 +11,14 @@ class ComponentInterface
         foreach ($values as $key => $type) if (isset($props->{$key})) {
             $value = $props->{$key};
 
-            $props->{$key} = match (strtolower(string: $type)) {
-                "boolean" | "bool" => boolval(value: $value),
-                "integer" | "int" => intval(value: $value),
-                "double" => doubleval(value: $value),
-                "float" => floatval(value: $value),
+            $props->{$key} = match (strtolower($type)) {
+                "boolean" | "bool" => filter_var($value, FILTER_VALIDATE_BOOLEAN),
+                "integer" | "int" => intval($value),
+                "double" => doubleval($value),
+                "float" => floatval($value),
                 "string" | "str" => (string)$value,
-                "array" => (array)json_decode(json: $value, associative: true),
-                "object" => json_decode(json: $value, associative: true),
-                    // "resource" => false, # No se que es esto :c
+                "array" => (array)json_decode($value,  true),
+                "object" => json_decode($value,  true),
                 default => $value,
             };
         }

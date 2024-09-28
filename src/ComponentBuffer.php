@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Oscurlo\ComponentRenderer;
 
-class ComponentBuffer extends ComponentInterpreter implements Rendering
+class ComponentBuffer extends ComponentInterpreter
 {
+    # Option 2: Use the buffer to capture the html
+
     /**
      * Start buffering
      * 
-     * @param string|array $components
      * @return self
      */
     public function start(): self
@@ -18,27 +19,16 @@ class ComponentBuffer extends ComponentInterpreter implements Rendering
         return $this;
     }
 
-    public function render(string $html): self
-    {
-        return self::print(self::interpreter($html));
-    }
-
-    public function print(string $string): self
-    {
-        echo $string;
-        return $this;
-    }
-
     /**
-     * End output buffering
+     * End output buffering and display content
      * 
-     * @return self
+     * @return void
      */
-    public function end(): self
+    public function end(): void
     {
         $result = self::interpreter(ob_get_contents());
         ob_end_clean();
 
-        return self::print($result);
+        self::print($result);
     }
 }
