@@ -6,6 +6,8 @@ final class Layout
 {
     static function system(object $props): string
     {
+        $props->title ??= "ComponentRenderer";
+
         return <<<HTML
         <!DOCTYPE html>
         <html lang="es">

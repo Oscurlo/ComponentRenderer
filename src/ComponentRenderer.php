@@ -11,10 +11,11 @@ final class ComponentRenderer extends ComponentBuffer
      * 
      * @param ?array $folder
      */
-    public function __construct(?array $folder = null)
+    public function __construct(?array $components = null)
     {
-        parent::__construct();
-        if (!empty($folder)) self::set_component_manager($folder);
+        if ($components) {
+            self::set_component_manager($components);
+        }
     }
 
     # Option 1: Pass the html directly and display the content
@@ -28,7 +29,10 @@ final class ComponentRenderer extends ComponentBuffer
      */
     public function render(string $html, ?array $components = null): void
     {
-        if (!empty($components)) self::set_component_manager($components);
+        if ($components) {
+            self::set_component_manager($components);
+        }
+
         self::print(self::interpreter($html));
     }
 }

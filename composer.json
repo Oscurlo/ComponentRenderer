@@ -5,8 +5,12 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
+            "Examples\\": "examples/",
             "Oscurlo\\ComponentRenderer\\": "src/"
-        }
+        },
+        "files": [
+            "examples/components/Test2.php"
+        ]
     },
     "authors": [
         {

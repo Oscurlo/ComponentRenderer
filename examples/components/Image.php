@@ -18,15 +18,9 @@ function Image(object $main): string
 {
     @[
         "src" => $src
-    ] = (array)$main;
+    ] = (array) $main;
 
-    $attrs = ComponentManager::extract_attributes(
-        (array)$main,
-        array_filter(
-            array_keys((array)$main),
-            fn($col) => !in_array($col, ["children", "textContent"])
-        )
-    );
+    $attrs = ComponentManager::get_attributes($main);
 
     $html = "<img {$attrs}>";
 
@@ -41,8 +35,8 @@ function Image(object $main): string
 
         $img = $dom->getElementsByTagName("img")->item(0);
 
-        $img->setAttribute("width", (string)$width);
-        $img->setAttribute("height", (string)$height);
+        $img->setAttribute("width", (string) $width);
+        $img->setAttribute("height", (string) $height);
         $img->setAttribute("loading", "lazy");
 
         $html = ComponentManager::get_body(

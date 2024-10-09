@@ -6,7 +6,6 @@ namespace Oscurlo\ComponentRenderer;
 
 use DOMDocument;
 use DOMNode;
-use Exception;
 
 class ComponentExecutor extends ComponentManager
 {
@@ -16,61 +15,63 @@ class ComponentExecutor extends ComponentManager
      * @param string $component
      * @param array $attributes    
      * @param DOMNode $tag
-     * 
-     * @throws Exception Component not found
+     * @return void
      */
     public function execute_component(string $folder, string $component, object $attributes, DOMNode $tag): void
     {
+        if (self::check("file", $folder, $component)) {
+            if (!self::check("function_normal", $folder, $component) || !self::check("method_normal", $folder, $component)) {
+                include_once self::get_file($folder, $component);
+            }
+        }
 
-        $dom = new DOMDocument(
-            version: $this->dom_version,
-            encoding: $this->dom_encoding
-        );
-
-        libxml_use_internal_errors(true);
-
-        $is_a = match (true) {
-            strpos($component, "::") !== false => "method_static",
-                // strpos($component, "->") !== false => "method_public",
-            default => "function",
+        $source = match (true) {
+            self::check("method", $folder, $component) => (string) (new $folder)->$component($attributes),
+            self::check("method_normal", $folder, $component) => (string) (function () use ($component, $attributes) {
+                    @[$class, $method] = explode("::", $component);
+                    return (string) (new $class)->$method($attributes); // Ejecuta el método y convierte el resultado a string
+                })(),
+            self::check("function", $folder, $component) => (string) self::valid_name_function($folder, $component)($attributes),
+            self::check("function_normal", $folder, $component) => (string) $component($attributes),
+            default => null
         };
 
-        @[$classname, $method] = explode(strpos($component, "::") !== false ? "::" : "->", $component);
+        if ($source) {
 
-        if (!function_exists($classname) || !class_exists($classname)) include_once self::get_file($folder, $component);
-
-        if (function_exists($classname) || class_exists($classname) && method_exists($classname, (string)$method)) {
-
-            $source = match ($is_a) {
-                "method_static" => $classname::$method($attributes),
-                // "method_public" => (new $classname)->$method($attributes),
-                "function" => $classname($attributes),
-            };
-
-            // if (empty($source)) new Exception("No valid empty value");
-
-            $contains_html_base = self::contains_html_base($source);
-
-            if ($contains_html_base) {
-                $this->contains_html = true;
+            if (self::contains_html_base($source)) {
+                $this->contains_html_base = true;
                 $this->dom->loadHTML($source, LIBXML_NOERROR);
-                return;
+            } else {
+                self::replace_component($source, $tag);
             }
+        }
+    }
 
-            if (!$dom->loadHTML(self::html_base($source, $this->dom_encoding), LIBXML_NOERROR)) throw new Exception("Error Processing Request");
+    private function replace_component(string $source, DOMNode $tag): void
+    {
+        $dom = new DOMDocument(
+            $this->dom_version,
+            $this->dom_encoding
+        );
 
+        $previousErrorSetting = libxml_use_internal_errors(true);
+
+        if ($dom->loadHTML(self::html_base($source, $this->dom_encoding), LIBXML_NOERROR)) {
             $body = $dom->getElementsByTagName("body")->item(0);
 
-            if (!$body) throw new Exception("No body tag found in the component's HTML");
-
             $importedNodes = [];
-            foreach ($body->childNodes as $child) $importedNodes[] = $tag->ownerDocument->importNode($child->cloneNode(true), true);
 
-            foreach ($importedNodes as $importedNode) $tag->parentNode->insertBefore($importedNode, $tag);
+            foreach ($body->childNodes as $child) {
+                $importedNodes[] = $tag->ownerDocument->importNode($child->cloneNode(true), true);
+            }
+
+            foreach ($importedNodes as $importedNode) {
+                $tag->parentNode->insertBefore($importedNode, $tag);
+            }
 
             $tag->parentNode->removeChild($tag);
-        } else {
-            throw new Exception("An error occurred while executing the function: {$component}");
         }
+
+        libxml_use_internal_errors($previousErrorSetting);
     }
 }

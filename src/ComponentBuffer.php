@@ -13,10 +13,9 @@ class ComponentBuffer extends ComponentInterpreter
      * 
      * @return self
      */
-    public function start(): self
+    public function start(): void
     {
         ob_start();
-        return $this;
     }
 
     /**
@@ -24,11 +23,9 @@ class ComponentBuffer extends ComponentInterpreter
      * 
      * @return void
      */
+
     public function end(): void
     {
-        $result = self::interpreter(ob_get_contents());
-        ob_end_clean();
-
-        self::print($result);
+        self::print(self::interpreter(ob_get_clean()));
     }
 }

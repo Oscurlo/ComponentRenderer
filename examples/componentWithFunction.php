@@ -12,9 +12,9 @@ $render = new ComponentRenderer(
 );
 
 $render->start();
-echo <<<HTML
+echo <<<XML
 <title>component with function</title>
 <HelloWorld></HelloWorld>
 <HelloWorld>Hola <b>wenas</b></HelloWorld>
-HTML;
+XML;
 $render->end();
