@@ -8,28 +8,31 @@ use Oscurlo\ComponentRenderer\Component;
 
 class Bootstrap
 {
-    static function card(object $prop): string
+    static function card(object $props): string
     {
-        $prop->title ??= false;
-        $prop->footer ??= false;
+        $props->title ??= false;
+        $props->footer ??= false;
 
-        return Component::render(<<<HTML
-        <div class="card">
-            <div class="card-body">{$prop->children}</div>
-        </div>
-        HTML);
+        $filename = dirname(__DIR__) . "/templates/card.blade.php";
+
+        return Component::render(Component::template(
+            filename: $filename,
+            props: $props
+        ));
     }
 
-    static function accordion(object $prop): string
+    static function accordion(object $props): string
     {
-        @[
-            "id" => $id,
-            "textContent" => $textContent,
-            "index-collapse" => $indexCollapse
-        ] = (array) $prop;
+        // Destructuring in PHP is not that great, so it's best to avoid it just in case.
+        // @["id" => $id, "textContent" => $textContent, "index-collapse" => $indexCollapse] = (array) $props;
 
-        if (!$id)
+        $id = $props->{"id"} ?? "";
+        $textContent = $props->{"textContent"} ?? "";
+        $indexCollapse = $props->{"index-collapse"} ?? "";
+
+        if (!$id) {
             throw new Exception("ID is required");
+        }
 
         $result = "";
 
@@ -38,8 +41,9 @@ class Bootstrap
 
         $jsonData = json_decode($textContent, true);
 
-        if (json_last_error() !== JSON_ERROR_NONE)
+        if (json_last_error() !== JSON_ERROR_NONE) {
             throw new Exception("JSON no is valid");
+        }
 
         $newAccordion = fn(array $info, int $index, int $chekIndex = 0) => <<<HTML
         <div class="accordion-item">
@@ -57,8 +61,9 @@ class Bootstrap
         </div>
         HTML;
 
-        foreach ($jsonData as $i => $data)
+        foreach ($jsonData as $i => $data) {
             $result .= $newAccordion($data, $i, (int) $indexCollapse) ?: 0;
+        }
 
         return <<<HTML
         <div class="accordion" id="{$id}">

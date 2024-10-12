@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Examples\Components;
+namespace Oscurlo\ComponentRenderer\Examples\Components;
 
 use Oscurlo\ComponentRenderer\Component;
 

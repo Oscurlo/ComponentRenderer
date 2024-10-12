@@ -1,7 +1,9 @@
 <?php
 
-use Examples\Layouts\TestLayout;
+# Example with bootstrap 5.3.3: https://getbootstrap.com/
+
 use Oscurlo\ComponentRenderer\ComponentRenderer;
+use Oscurlo\ComponentRenderer\Examples\Layouts\TestLayout;
 
 include "../vendor/autoload.php";
 

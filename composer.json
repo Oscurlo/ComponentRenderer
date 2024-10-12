@@ -5,7 +5,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Examples\\": "examples/",
+            "Oscurlo\\ComponentRenderer\\Examples\\": "examples/",
             "Oscurlo\\ComponentRenderer\\": "src/"
         },
         "files": [

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Examples\Layouts;
+namespace Oscurlo\ComponentRenderer\Examples\Layouts;
 
 use Oscurlo\ComponentRenderer\Component;
 
 final class TestLayout
 {
-    static function system(object $props): string
+    public function system(object $props): string
     {
         $props->title ??= "ComponentRenderer";
 
@@ -17,6 +17,10 @@ final class TestLayout
 
         $filename = dirname(__DIR__) . "/templates/test.blade.php";
 
-        return Component::render(Component::template($filename, $props, ["test" => "que pasa crack"]));
+        return Component::render(Component::template(
+            $filename,
+            ["test" => "que pasa crack"],
+            $props
+        ));
     }
 }

@@ -15,13 +15,21 @@ $render = new ComponentRenderer(
     ]
 );
 
-$render->start();
-echo <<<XML
+?>
+
+<?php $render->start() ?>
 <Layout::center title="Explicit Width And Height">
-    <Bootstrap::card title="Image">
-        <Image src="./img/logo.png" alt="Image with explicit width and height" class="img-fluid" />
-        <Image src="./img/logo.png" alt="Image with explicit width and height" class="img-fluid" />
-    </Bootstrap::card>
+    <div class="container">
+        <Bootstrap::card title="Image">
+            <div class="row">
+                <div class="col-6">
+                    <Image src="img/logo.png" alt="Image with explicit width and height" class="img-fluid" />
+                </div>
+                <div class="col-6">
+                    <Image src="img/logo.png" alt="Image with explicit width and height" class="img-fluid" />
+                </div>
+            </div>
+        </Bootstrap::card>
+    </div>
 </Layout::center>
-XML;
-$render->end();
+<?php $render->end() ?>

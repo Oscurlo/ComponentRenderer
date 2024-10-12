@@ -28,8 +28,12 @@ class ComponentExecutor extends ComponentManager
         $source = match (true) {
             self::check("method", $folder, $component) => (string) (new $folder)->$component($attributes),
             self::check("method_normal", $folder, $component) => (string) (function () use ($component, $attributes) {
-                    @[$class, $method] = explode("::", $component);
-                    return (string) (new $class)->$method($attributes); // Ejecuta el método y convierte el resultado a string
+                    // Destructuring in PHP is not that great, so it's best to avoid it just in case.
+                    // @[$class, $method] = explode("::", $component);
+                    $split = explode("::", $component);
+                    $class = $split[0] ?? "";
+                    $method = $split[1] ?? "";
+                    return (string) (new $class)->$method($attributes);
                 })(),
             self::check("function", $folder, $component) => (string) self::valid_name_function($folder, $component)($attributes),
             self::check("function_normal", $folder, $component) => (string) $component($attributes),

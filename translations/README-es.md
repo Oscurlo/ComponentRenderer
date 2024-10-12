@@ -78,9 +78,9 @@ Para crear componentes puedes utilizar funciones o métodos estáticos. Consider
 2. El componente recibe un solo valor de tipo "object" con los atributos enviados al componente.
 3. El valor de retorno debe ser un "string".
 4. Si deseas agregar más componentes, puedes utilizar la clase Component. Esta clase se encarga de renderizar y retornar el resultado.
-5. Si vas a usar clases para los componentes, evita el uso de "namespace".
+<del>5. Si vas a usar clases para los componentes, evita el uso de "namespace".</del>
 
-> Aún estoy buscando una solución para este último punto. El problema radica en que incluyo el archivo del componente y ejecuto la función o método, pero el uso de "namespace" podría generar conflictos.
+> Ya tengo <del> Aún estoy buscando</del> una solución para este último punto. <del>El problema radica en que incluyo el archivo del componente y ejecuto la función o método, pero el uso de "namespace" podría generar conflictos.</del>
 
 ### valores por defecto
 

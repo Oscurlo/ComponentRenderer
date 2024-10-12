@@ -78,9 +78,9 @@ To create components, you can use functions or static methods. Keep in mind the 
 2. The component receives a single "object" parameter containing the attributes passed to the component.
 3. The return value must be a "string".
 4. If you want to add more components, you can use the Component class. This class handles rendering and returns the result.
-5. If you're using classes for the components, avoid using namespaces.
+<del>5. If you're using classes for the components, avoid using namespaces.</del>
 
-> I'm still working on solving this last issue. The problem is that I include the component file and execute the function or method, but the use of namespaces might cause conflicts.
+> I already have <del>I'm still looking for</del> a solution for this last point. <del>The problem lies in that I include the component file and execute the function or method, but the use of "namespace" might cause conflicts.</del>
 
 ### Default Values
 

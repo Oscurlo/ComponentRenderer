@@ -151,7 +151,10 @@ class ComponentManager extends ComponentInterface
 
     protected static function check(string $exists, string $folder_or_function, string $component): bool
     {
-        @[$class, $method] = explode("::", $component);
+        // @[$class, $method] = explode("::", $component);
+        $split = explode("::", $component);
+        $class = $split[0] ?? "";
+        $method = $split[1] ?? "";
 
         return match ($exists) {
             # file
@@ -161,7 +164,7 @@ class ComponentManager extends ComponentInterface
             "function" => function_exists(self::valid_name_function($folder_or_function, $component)),
             # path
             "method_normal" => method_exists((string) $class, (string) $method),
-            "function_normal" => function_exists($component),
+            "function_normal" => function_exists($component)
         };
     }
 

@@ -1,5 +1,3 @@
-<!-- punto de referencia -->
-
 <!DOCTYPE html>
 <html lang="{{ $props->lang }}">
 
@@ -17,7 +15,7 @@
 
     <!-- test condicion -->
     {{ @if (isset($test)): }}
-        {{$test}}
+        {{ $test }}
     {{ @endif }}
 
     <!-- script -->
