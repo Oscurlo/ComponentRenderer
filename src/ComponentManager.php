@@ -12,7 +12,7 @@ use Exception;
 class ComponentManager extends ComponentInterface
 {
     # DOM
-    public DOMDocument $dom;
+    protected DOMDocument $dom;
 
     # DOM version
     public string $dom_version = "1.0";
@@ -21,66 +21,91 @@ class ComponentManager extends ComponentInterface
     public string $dom_encoding = "UTF-8";
 
     # Component path
-    protected array $component_folders = [];
+    protected static array $component_manager = [];
 
     # Validates if it contains the html tag and does not need to load a base content
     # I created this variable, for example, to load layouts.
     protected bool $contains_html_base = false;
+    private array $check_storage;
 
     /**
      * Set the component path
-     * 
-     * @param string $source Path to the component
-     * @throws Exception If the folder is not found
+     *
+     * @param array $components
      * @return void
      */
 
-    public function __construct()
-    {
-        $this->dom = new DOMDocument(
-            $this->dom_version,
-            $this->dom_encoding
-        );
-
-        # https://www.php.net/manual/en/class.domdocument.php
-        $this->dom->preserveWhiteSpace = false; # Remove redundant white space
-        $this->dom->formatOutput = true; # Output formats with indentation and extra space.
-    }
-
     public function set_component_manager(array $components): void
     {
-        $this->component_folders = array_filter(
-            array_map(
-                fn(string $key, array|string $value) => [
-                    rtrim($key, "/\\") => array_map(
-                        fn($value) => trim($value),
-                        array_unique(is_string($value) ? [$value] : $value)
-                    )
-                ],
-                array_keys($components),
-                array_values($components)
-            ),
-            fn($component) => !empty ($component)
+        $array = [...$components, ...self::$component_manager];
+        $components = array_map(
+            fn(array|string $name) => is_string($name) ? [$name] : $name,
+            $array
         );
+
+        foreach ($components as $references => $values) {
+            foreach ($values as $i => $component) {
+                $old_key = $references;
+                $new_key = str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $references);
+
+                if (self::component_exists($old_key, $component)) {
+                    if (is_dir($new_key)) {
+                        $new_key = realpath($new_key);
+                        unset($components[$old_key]);
+                        $components[$new_key] = $values;
+                    }
+                } else {
+                    $new_key = realpath($new_key);
+                    unset($components[$old_key][$i], $components[$new_key][$i]);
+                }
+            }
+        }
+
+        self::$component_manager = $components;
     }
 
     /**
      * Get the component path
-     * 
+     *
      * @return array|null
      */
-    public function get_component_manager()
+    public function get_component_manager(): ?array
     {
-        return $this->component_folders;
+        return self::$component_manager;
+    }
+
+    /**
+     * @param string $references
+     * @param array|string $components
+     * @return void
+     * @throws Exception
+     */
+    public static function register_component(string $references, array|string $components): void
+    {
+        $components = is_string($components) ? [$components] : $components;
+
+        foreach ($components as $component) {
+            if (!(new self)->component_exists($references, $component)) {
+                throw new Exception("Component not found");
+            }
+        }
+
+        $current = self::$component_manager[$references] ?? [];
+
+        self::$component_manager[$references] = array_unique([
+            ...$current,
+            ...$components
+        ]);
     }
 
     /**
      * Check if the component exists
-     * 
+     *
+     * @param string $folder_or_function
      * @param string $component Component name
      * @return bool
      */
-    protected static function component_exists(string $folder_or_function, string $component): bool
+    protected function component_exists(string $folder_or_function, string $component): bool
     {
         return match (is_dir($folder_or_function)) {
             true => self::check("file", $folder_or_function, $component),
@@ -89,49 +114,45 @@ class ComponentManager extends ComponentInterface
         };
     }
 
-    protected static function get_file($folder, $component): string
+    /**
+     * @param string $folder
+     * @param string $component
+     * @return string
+     */
+    protected static function get_file(string $folder, string $component): string
     {
         [$file] = explode("::", $component);
         return "{$folder}/{$file}.php";
-    }
-
-    /**
-     * Encode an array to JSON
-     * 
-     * @param array $value Array to encode
-     * @return bool|string
-     */
-    static function json_encode(array $value): bool|string
-    {
-        return json_encode($value, JSON_UNESCAPED_UNICODE);
     }
 
     protected function convert_to_valid_tag(string &$html): void
     {
         $array_tag = fn($tag) => ["<{$tag}", "</{$tag}"];
 
-        foreach ($this->component_folders as $a => $folders) {
-            foreach ($folders as $folder => $components) {
-                foreach ($components as $e => $component) {
-                    if (self::check("method", $folder, $component)) {
-                        $split = explode("\\", $folder);
-                        $class = end($split);
-                        $component = "{$class}::{$component}";
-                    }
-
-                    $html = str_replace(
-                        $array_tag($component),
-                        $array_tag(self::valid_tag($folder, $component)),
-                        $html
-                    );
+        foreach (self::$component_manager as $folder => $components) {
+            foreach ($components as $component) {
+                if (self::check("method", $folder, $component)) {
+                    $split = explode("\\", $folder);
+                    $class = end($split);
+                    $component = "{$class}::{$component}";
                 }
+
+                $html = str_replace(
+                    $array_tag($component),
+                    $array_tag(self::valid_tag($folder, $component)),
+                    $html
+                );
             }
         }
     }
 
-    protected static function valid_tag(string $folder_or_function, string $component): string
+    /**
+     * @param string $folder_or_function
+     * @param string $component
+     * @return string
+     */
+    protected function valid_tag(string $folder_or_function, string $component): string
     {
-
         $name = "component-";
 
         if (strpos($component, $name)) {
@@ -149,34 +170,52 @@ class ComponentManager extends ComponentInterface
         return $name;
     }
 
-    protected static function check(string $exists, string $folder_or_function, string $component): bool
+    /**
+     * @param string $exists
+     * @param string $folder_or_function
+     * @param string $component
+     * @return bool
+     */
+    protected function check(string $exists, string $folder_or_function, string $component): bool
     {
-        // @[$class, $method] = explode("::", $component);
+        $key = "{$exists}->{$folder_or_function}[$component]";
+
+        if (isset($this->check_storage[$key])) {
+            return $this->check_storage[$key];
+        }
+
         $split = explode("::", $component);
         $class = $split[0] ?? "";
         $method = $split[1] ?? "";
 
-        return match ($exists) {
+        $this->check_storage[$key] = match ($exists) {
             # file
             "file" => file_exists(self::get_file($folder_or_function, $component)),
             # namespace
             "method" => method_exists($folder_or_function, $component),
             "function" => function_exists(self::valid_name_function($folder_or_function, $component)),
             # path
-            "method_normal" => method_exists((string) $class, (string) $method),
+            "method_normal" => method_exists($class, $method),
             "function_normal" => function_exists($component)
         };
+
+        return $this->check_storage[$key];
     }
 
-    protected static function valid_name_function(string $folder_or_function, string $component)
+    /**
+     * @param string $folder_or_function
+     * @param string $component
+     * @return string
+     */
+    protected static function valid_name_function(string $folder_or_function, string $component): string
     {
-        return str_ireplace("function ", "", "{$folder_or_function}\\{$component}");
+        return "{$folder_or_function}\\{$component}";
     }
 
     /**
      * Extract attributes from an array
      * 
-     * @deprecated I didn't find the feature very useful and I'm not sure if I should remove it. use "self::get_attributes"
+     * @deprecated I didn't find the feature very useful, and I'm not sure if I should remove it. use "self::get_attributes"
      * @param array|object $main Main array
      * @param array $columns Columns to extract
      * @param string $encoding Encoding type
@@ -224,7 +263,7 @@ class ComponentManager extends ComponentInterface
     static function html_base(string $html, string $encoding = "UTF-8"): string
     {
         return <<<HTML
-        <html>
+        <html lang="en">
             <meta http-equiv="Content-Type" content="text/html;charset={$encoding}">
             <meta charset="{$encoding}">
             <body>{$html}</body>
@@ -257,13 +296,16 @@ class ComponentManager extends ComponentInterface
             }
         }
 
-        return $bodyContent ?? $html;
+        $bodyContent ??= $html;
+
+        return $bodyContent;
     }
 
     /**
      * Gets the attributes of the component
-     * 
+     *
      * @param DOMNode $tag
+     * @return object
      */
     protected function get_params(DOMNode $tag): object
     {
@@ -278,7 +320,12 @@ class ComponentManager extends ComponentInterface
             $attrs["children"] = "";
 
             foreach ($tag->childNodes as $child) {
-                $attrs["children"] .= $this->dom->saveHTML($this->dom->importNode($child, true));
+                $attrs["children"] .= $this->dom->saveHTML(
+                    $this->dom->importNode(
+                        $child,
+                        true
+                    )
+                );
             }
         }
 
@@ -295,13 +342,14 @@ class ComponentManager extends ComponentInterface
      */
     protected static function contains_html_base(string $html): bool
     {
-        return preg_match("|<html(.*?)</html>|s", $html) ? true : false;
+        return (bool) preg_match("|<html(.*?)</html>|s", $html);
     }
 
     /**
      * Print 😅
+     * @param string ...$expressions
      */
-    protected static function print(string ...$expressions): void
+    public static function print(string ...$expressions): void
     {
         echo implode(" ", $expressions);
     }

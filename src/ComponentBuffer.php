@@ -10,8 +10,8 @@ class ComponentBuffer extends ComponentInterpreter
 
     /**
      * Start buffering
-     * 
-     * @return self
+     *
+     * @return void
      */
     public function start(): void
     {
@@ -26,6 +26,10 @@ class ComponentBuffer extends ComponentInterpreter
 
     public function end(): void
     {
-        self::print(self::interpreter(ob_get_clean()));
+        self::print(
+            self::interpreter(
+                ob_get_clean()
+            )
+        );
     }
 }

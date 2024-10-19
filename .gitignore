@@ -4,3 +4,6 @@
 # Dependencias
 vendor
 composer.lock
+
+# ni idea
+.idea

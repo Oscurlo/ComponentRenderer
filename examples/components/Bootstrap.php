@@ -2,16 +2,17 @@
 
 declare(strict_types=1);
 
+namespace Oscurlo\ComponentRenderer\Examples\Components;
+
+use Exception;
 use Oscurlo\ComponentRenderer\Component;
 
-# This's a regular example
-
-class Bootstrap
+final class Bootstrap
 {
-    static function card(object $props): string
+    public static function card(object $props): string
     {
-        $props->title ??= false;
-        $props->footer ??= false;
+        $props->{"card-title"} ??= false;
+        $props->{"card-footer"} ??= false;
 
         $filename = dirname(__DIR__) . "/templates/card.blade.php";
 
@@ -21,7 +22,7 @@ class Bootstrap
         ));
     }
 
-    static function accordion(object $props): string
+    public function accordion(object $props): string
     {
         // Destructuring in PHP is not that great, so it's best to avoid it just in case.
         // @["id" => $id, "textContent" => $textContent, "index-collapse" => $indexCollapse] = (array) $props;

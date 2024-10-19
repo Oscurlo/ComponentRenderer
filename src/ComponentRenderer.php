@@ -8,13 +8,15 @@ final class ComponentRenderer extends ComponentBuffer
 {
     /**
      * For easier use, the construct also receives the folder where the components are located.
-     * 
-     * @param ?array $folder
+     *
+     * @param array|null $components
      */
     public function __construct(?array $components = null)
     {
         if ($components) {
-            self::set_component_manager($components);
+            self::set_component_manager(
+                $components
+            );
         }
     }
 
@@ -30,9 +32,15 @@ final class ComponentRenderer extends ComponentBuffer
     public function render(string $html, ?array $components = null): void
     {
         if ($components) {
-            self::set_component_manager($components);
+            self::set_component_manager(
+                $components
+            );
         }
 
-        self::print(self::interpreter($html));
+        self::print(
+            self::interpreter(
+                $html
+            )
+        );
     }
 }

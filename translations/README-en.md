@@ -43,7 +43,7 @@ $componentRenderer = new ComponentRenderer($components);
 # $componentRenderer->set_component_manager($components);
 ```
 
-### Forma 1
+### Example 1
 
 ```php
 # The render method processes and outputs the content
@@ -54,7 +54,7 @@ $componentRenderer->render(<<<XML
 XML);
 ```
 
-### Forma 2
+### Example 2
 
 ```php
 # Use the buffer method to capture the content
@@ -90,7 +90,7 @@ To create components, you can use functions or static methods. Keep in mind the 
 ```JSON
 {
     "children": "Elements.",
-    "textContent": "Text.",
+    "textContent": "Text."
 }
 ```
 
@@ -166,5 +166,5 @@ If you want to contribute to this project, follow these steps:
 
 If you'd like to support my work, feel free to buy me a coffee 😘.
 
-[![Invítame un café](https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png)](https://www.buymeacoffee.com/oscurlo)
+[![Buy me a coffee](https://www.buymeacoffee.com/assets/img/custom_images/yellow_img.png)](https://www.buymeacoffee.com/oscurlo)
 [![Donate with PayPal](https://raw.githubusercontent.com/stefan-niedermann/paypal-donate-button/master/paypal-donate-button.png)](<https://paypal.me/oscurlo?country.x=CO&locale.x=es_XC>)

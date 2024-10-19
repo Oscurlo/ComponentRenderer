@@ -16,24 +16,36 @@ class ComponentInterpreter extends ComponentExecutor
      */
     protected function interpreter(string $html): string
     {
-        if (!$this->component_folders) {
+        if (!self::$component_manager) {
             return $html;
         }
+
 
         $this->dom = new DOMDocument(
             $this->dom_version,
             $this->dom_encoding
         );
 
-        $previousErrorSetting = libxml_use_internal_errors(true);
+        # https://www.php.net/manual/en/class.domdocument.php
+        $this->dom->preserveWhiteSpace = false; # Remove redundant white space
+        $this->dom->formatOutput = true; # Output formats with indentation and extra space.
+
+        $previousErrorSetting = libxml_use_internal_errors(
+            true
+        );
 
         $this->contains_html_base = self::contains_html_base($html);
 
         self::convert_to_valid_tag($html);
 
         if ($this->dom->loadHTML($this->contains_html_base ? $html : self::html_base($html), LIBXML_NOERROR)) {
-            foreach ($this->component_folders as $folders) {
-                self::processFolders($folders);
+            foreach (self::$component_manager as $references => $values) {
+                foreach ($values as $component) {
+                    self::processComponent(
+                        $references,
+                        $component
+                    );
+                }
             }
         }
 
@@ -42,33 +54,28 @@ class ComponentInterpreter extends ComponentExecutor
         return $this->contains_html_base ? $this->dom->saveHTML() : self::get_body($this->dom->saveHTML());
     }
 
-    private function processFolders(array $folders)
+    /**
+     * @param string $folder
+     * @param string $component
+     */
+    private function processComponent(string $folder, string $component): void
     {
-        foreach ($folders as $folder => $components) {
-            foreach ($components as $component) {
-                self::processComponent($folder, $component);
-            }
+        foreach (self::getTagsForComponent($folder, $component) as $tag) {
+            self::execute_component(
+                $folder,
+                $component,
+                self::get_params($tag),
+                $tag
+            );
         }
     }
 
     /**
      * @param string $folder
      * @param string $component
-     */
-    private function processComponent($folder, $component)
-    {
-        if (self::component_exists($folder, $component)) {
-            foreach (self::getTagsForComponent($folder, $component) as $tag) {
-                self::execute_component($folder, $component, self::get_params($tag), $tag);
-            }
-        }
-    }
-
-    /**
-     * @param string $component
      * @return array
      */
-    private function getTagsForComponent($folder, $component)
+    private function getTagsForComponent(string $folder, string $component): array
     {
         $tagsList = [];
 
