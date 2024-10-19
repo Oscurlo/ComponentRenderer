@@ -49,11 +49,13 @@ class ComponentManager extends ComponentInterface
                 $new_key = str_replace(["/", "\\"], DIRECTORY_SEPARATOR, $references);
 
                 if (self::component_exists($old_key, $component)) {
-                    if (is_dir($new_key)) {
-                        $new_key = realpath($new_key);
-                        unset($components[$old_key]);
-                        $components[$new_key] = $values;
-                    }
+                    # I don't know what I'm doing wrong, but this isn't working for me at all. I'm going to delete it for now.
+                    // if (is_dir($new_key)) {
+                    //     $new_key = realpath($new_key);
+                    //     unset($components[$old_key]);
+                    //     $components[$new_key] = $values;
+                    // }
+                    continue;
                 } else {
                     $new_key = realpath($new_key);
                     unset($components[$old_key][$i], $components[$new_key][$i]);
