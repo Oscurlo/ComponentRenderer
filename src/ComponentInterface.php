@@ -1,12 +1,9 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Oscurlo\ComponentRenderer;
 
 class ComponentInterface
 {
-
     /**
      * @param array $values
      * @param object $props
@@ -18,14 +15,14 @@ class ComponentInterface
                 $value = $props->{$key};
 
                 $props->{$key} = match (strtolower($type)) {
-                    "boolean" | "bool" => self::boolean($value),
-                    "integer" | "int" => intval($value),
+                    "boolean", "bool" => self::boolean($value),
+                    "integer", "int" => intval($value),
                     "double" => doubleval($value),
                     "float" => floatval($value),
-                    "string" | "str" => (string) $value,
+                    "string", "str" => (string) $value,
                     "array" => (array) json_decode($value, true),
                     "object" => json_decode($value, true),
-                    default => "not found"
+                    default => $value
                 };
             }
         }
