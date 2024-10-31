@@ -55,7 +55,7 @@ class ComponentManager extends ComponentInterface
             }
         }
 
-        self::$component_manager = $components;
+        self::$component_manager = [...$components, ...self::$component_manager];
     }
 
     /**
@@ -69,27 +69,13 @@ class ComponentManager extends ComponentInterface
     }
 
     /**
-     * @param string $references
-     * @param array|string $components
+     * @param array $components
      * @return void
      * @throws Exception
      */
-    public static function register_component(string $references, array|string $components): void
+    public static function register_component(array $components): void
     {
-        $components = is_string($components) ? [$components] : $components;
-
-        foreach ($components as $component) {
-            if (!(new self)->component_exists($references, $component)) {
-                throw new Exception("Component not found");
-            }
-        }
-
-        $current = self::$component_manager[$references] ?? [];
-
-        self::$component_manager[$references] = array_unique([
-            ...$current,
-            ...$components
-        ]);
+        (new static)->set_component_manager($components);
     }
 
     /**
