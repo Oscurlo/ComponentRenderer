@@ -8,4 +8,5 @@ use PHPUnit\Framework\TestCase;
 
 final class ComponentExecutorTest extends TestCase
 {
+
 }

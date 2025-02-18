@@ -1,13 +1,11 @@
-<?php
-
-declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Oscurlo\ComponentRenderer;
 
 class ComponentInterface
 {
     /**
-     * @param array  $values
+     * @param array $values
      * @param object $props
      */
     public static function interface(array $values, object &$props): void

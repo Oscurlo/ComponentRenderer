@@ -37,8 +37,8 @@ final class Bootstrap
 
         $result = "";
 
-        $inCheck = fn (bool $check, mixed $yes, mixed $no) => $check ? $yes : $no;
-        $encode = fn (string $string) => base64_encode($string);
+        $inCheck = fn(bool $check, mixed $yes, mixed $no) => $check ? $yes : $no;
+        $encode = fn(string $string) => base64_encode($string);
 
         $jsonData = json_decode($textContent, true);
 
@@ -46,7 +46,7 @@ final class Bootstrap
             throw new Exception("JSON no is valid");
         }
 
-        $newAccordion = fn (array $info, int $index, int $chekIndex = 0) => <<<HTML
+        $newAccordion = fn(array $info, int $index, int $chekIndex = 0) => <<<HTML
         <div class="accordion-item">
             <h2 class="accordion-header">
                 <button class="accordion-button {$inCheck($index === $chekIndex, '', 'collapsed')}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{$encode('$index')}"

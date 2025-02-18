@@ -85,7 +85,7 @@ function InputField(object $props): string
     $attrs = Component::get_attributes($props, ["label-text"]);
 
     return <<<HTML
-    <label for="{$props->id}" class="form-label">{$props->{"label-text"}}</label>
+    <label for="{$props->id}" class="form-label">{$props->{"label-text"} }</label>
     <input {$attrs}>
     HTML;
 }
@@ -110,7 +110,7 @@ function TextareaField(object $props): string
     }
 
     return <<<HTML
-    <label for="{$props->id}" class="form-label">{$props->{"label-text"}}</label>
+    <label for="{$props->id}" class="form-label">{$props->{"label-text"} }</label>
     <textarea {$attrs}>{$props->children}</textarea>
     HTML;
 }

@@ -20,7 +20,7 @@ class ComponentBuffer extends ComponentInterpreter
 
     /**
      * End output buffering and display content
-     *
+     * 
      * @return void
      */
 

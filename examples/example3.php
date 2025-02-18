@@ -11,7 +11,7 @@ use Oscurlo\ComponentRenderer\ComponentRenderer;
 include_once "../vendor/autoload.php";
 include_once "./register/components.php";
 
-$render = new ComponentRenderer();
+$render = new ComponentRenderer;
 
 ?>
 
@@ -21,11 +21,12 @@ $render = new ComponentRenderer();
         <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh">
             <Bootstrap::card card-title="Example 3">
                 <Row>
-                    {{ @for ($i = 1; $i <= 4; $i++): }}
-                    <Column size="12" class="col-lg-6 mb-3">
-                        <InputField label-text="Example {{ $i }}" type="number" class="form-control" placeholder="Example {{ $i }}" />
-                    </Column>
-                    {{ @endfor }}
+                    <?php for ($i = 1; $i <= 4; $i++): ?>
+                        <Column size="12" class="col-lg-6 mb-3">
+                            <InputField label-text="Example <?= $i ?>" type="number" class="form-control"
+                                placeholder="Example <?= $i ?>" />
+                        </Column>
+                    <?php endfor ?>
 
                     <Column size="12">
                         <TextareaField label-text="Textarea" placeholder="Textarea" class="form-control">

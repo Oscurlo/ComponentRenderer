@@ -14,17 +14,17 @@ class ComponentExecutor extends ComponentManager
     /**
      * Executing component
      *
-     * @param  string  $references
-     * @param  string  $component
-     * @param  object  $attributes
-     * @param  DOMNode $tag
+     * @param string $references
+     * @param string $component
+     * @param object $attributes
+     * @param DOMNode $tag
      * @return void
      */
     public function execute_component(string $references, string $component, object $attributes, DOMNode $tag): void
     {
         if (!is_dir($references)) {
             $source = match (true) {
-                self::check("method", $references, $component) => (string) (new $references())->$component(
+                self::check("method", $references, $component) => (string) (new $references)->$component(
                     $attributes
                 ),
                 self::check("function", $references, $component) => (string) self::valid_name_function(
@@ -50,14 +50,14 @@ class ComponentExecutor extends ComponentManager
 
             $source = match (true) {
                 $method_normal_exists => (function () use ($component, $attributes) {
-                    $split = explode("::", $component);
-                    $class = $split[0] ?? "";
-                    $method = $split[1] ?? "";
+                        $split = explode("::", $component);
+                        $class = $split[0] ?? "";
+                        $method = $split[1] ?? "";
 
-                    return (string) (new $class())->$method(
+                        return (string) (new $class)->$method(
                         $attributes
-                    );
-                })(),
+                        );
+                    })(),
                 $function_normal_exists => $component(
                     $attributes
                 ),
@@ -82,7 +82,7 @@ class ComponentExecutor extends ComponentManager
     }
 
     /**
-     * @param string  $source
+     * @param string $source
      * @param DOMNode $tag
      */
     private function replace_component(string $source, DOMNode $tag): void
