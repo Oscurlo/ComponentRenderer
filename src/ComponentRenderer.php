@@ -24,9 +24,9 @@ final class ComponentRenderer extends ComponentBuffer
 
     /**
      * Render and display content
-     * 
-     * @param string $html
-     * @param ?array $components
+     *
+     * @param  string $html
+     * @param  ?array $components
      * @return void
      */
     public function render(string $html, ?array $components = null): void
