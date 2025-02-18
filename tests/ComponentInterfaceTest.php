@@ -13,7 +13,7 @@ final class ComponentInterfaceTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->test = new ComponentInterface;
+        $this->test = new ComponentInterface();
     }
 
     public function testBoolean(): void
@@ -40,7 +40,7 @@ final class ComponentInterfaceTest extends TestCase
             "test5" => "boolean",
             "test6" => "boolean",
             "test7" => "boolean",
-            "test8" => "boolean"
+            "test8" => "boolean",
         ], $props);
 
         for ($i = 1; $i <= 8; $i++) {

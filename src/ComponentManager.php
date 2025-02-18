@@ -31,7 +31,7 @@ class ComponentManager extends ComponentInterface
     /**
      * Set the component path
      *
-     * @param array $components
+     * @param  array $components
      * @return void
      */
 
@@ -39,7 +39,7 @@ class ComponentManager extends ComponentInterface
     {
         $array = [...$components, ...self::$component_manager];
         $components = array_map(
-            fn(array|string $name) => is_string($name) ? [$name] : $name,
+            fn (array|string $name) => is_string($name) ? [$name] : $name,
             $array
         );
 
@@ -69,20 +69,20 @@ class ComponentManager extends ComponentInterface
     }
 
     /**
-     * @param array $components
+     * @param  array     $components
      * @return void
      * @throws Exception
      */
     public static function register_component(array $components): void
     {
-        (new static)->set_component_manager($components);
+        (new static())->set_component_manager($components);
     }
 
     /**
      * Check if the component exists
      *
-     * @param string $folder_or_function
-     * @param string $component Component name
+     * @param  string $folder_or_function
+     * @param  string $component          Component name
      * @return bool
      */
     protected function component_exists(string $folder_or_function, string $component): bool
@@ -95,8 +95,8 @@ class ComponentManager extends ComponentInterface
     }
 
     /**
-     * @param string $folder
-     * @param string $component
+     * @param  string $folder
+     * @param  string $component
      * @return string
      */
     protected static function get_file(string $folder, string $component): string
@@ -107,7 +107,7 @@ class ComponentManager extends ComponentInterface
 
     protected function convert_to_valid_tag(string &$html): void
     {
-        $array_tag = fn($tag) => ["<{$tag}", "</{$tag}"];
+        $array_tag = fn ($tag) => ["<{$tag}", "</{$tag}"];
 
         foreach (self::$component_manager as $folder => $components) {
             foreach ($components as $component) {
@@ -127,8 +127,8 @@ class ComponentManager extends ComponentInterface
     }
 
     /**
-     * @param string $folder_or_function
-     * @param string $component
+     * @param  string $folder_or_function
+     * @param  string $component
      * @return string
      */
     protected function valid_tag(string $folder_or_function, string $component): string
@@ -151,9 +151,9 @@ class ComponentManager extends ComponentInterface
     }
 
     /**
-     * @param string $exists
-     * @param string $folder_or_function
-     * @param string $component
+     * @param  string $exists
+     * @param  string $folder_or_function
+     * @param  string $component
      * @return bool
      */
     protected function check(string $exists, string $folder_or_function, string $component): bool
@@ -183,8 +183,8 @@ class ComponentManager extends ComponentInterface
     }
 
     /**
-     * @param string $folder_or_function
-     * @param string $component
+     * @param  string $folder_or_function
+     * @param  string $component
      * @return string
      */
     protected static function valid_name_function(string $folder_or_function, string $component): string
@@ -194,14 +194,14 @@ class ComponentManager extends ComponentInterface
 
     /**
      * Extract attributes from an array
-     * 
+     *
      * @deprecated I didn't find the feature very useful, and I'm not sure if I should remove it. use "self::get_attributes"
-     * @param array|object $main Main array
-     * @param array $columns Columns to extract
-     * @param string $encoding Encoding type
+     * @param  array|object $main     Main array
+     * @param  array        $columns  Columns to extract
+     * @param  string       $encoding Encoding type
      * @return string
      */
-    static function extract_attributes(array|object $main, array $columns, string $encoding = "UTF-8"): string
+    public static function extract_attributes(array|object $main, array $columns, string $encoding = "UTF-8"): string
     {
         $attrs = [];
 
@@ -215,32 +215,32 @@ class ComponentManager extends ComponentInterface
     }
 
     /**
-     * 
-     * @param array|object $main Main array
-     * @param array $exclude Includes ["children", "textContent"]
+     *
+     * @param  array|object $main    Main array
+     * @param  array        $exclude Includes ["children", "textContent"]
      * @return string
      */
-    static function get_attributes(array|object $main, array $exclude = []): string
+    public static function get_attributes(array|object $main, array $exclude = []): string
     {
         $main = (array) $main;
 
         return self::extract_attributes(
             $main,
             array_filter(
-                array_keys(array_filter($main, fn($value): bool => !empty ($value))),
-                fn($key): bool => !in_array($key, ["children", "textContent", ...$exclude])
+                array_keys(array_filter($main, fn ($value): bool => !empty($value))),
+                fn ($key): bool => !in_array($key, ["children", "textContent", ...$exclude])
             )
         );
     }
 
     /**
      * Generate a base HTML structure
-     * 
-     * @param string $html HTML content
-     * @param string $encoding Encoding type
+     *
+     * @param  string $html     HTML content
+     * @param  string $encoding Encoding type
      * @return string
      */
-    static function html_base(string $html, string $encoding = "UTF-8"): string
+    public static function html_base(string $html, string $encoding = "UTF-8"): string
     {
         return <<<HTML
         <html lang="en">
@@ -253,13 +253,13 @@ class ComponentManager extends ComponentInterface
 
     /**
      * Get the contents inside the body tag
-     * 
-     * @param string $html HTML content
-     * @param string $version DOM version
-     * @param string $encoding DOM encoding
+     *
+     * @param  string $html     HTML content
+     * @param  string $version  DOM version
+     * @param  string $encoding DOM encoding
      * @return string
      */
-    static function get_body(string $html, string $version = "1.0", string $encoding = "UTF-8"): string
+    public static function get_body(string $html, string $version = "1.0", string $encoding = "UTF-8"): string
     {
         $dom = new DOMDocument($version, $encoding);
         libxml_use_internal_errors(true);
@@ -284,7 +284,7 @@ class ComponentManager extends ComponentInterface
     /**
      * Gets the attributes of the component
      *
-     * @param DOMNode $tag
+     * @param  DOMNode $tag
      * @return object
      */
     protected function get_params(DOMNode $tag): object
@@ -316,8 +316,8 @@ class ComponentManager extends ComponentInterface
 
     /**
      * Validate if it contains html
-     * 
-     * @param string $html
+     *
+     * @param  string $html
      * @return false
      */
     protected static function contains_html_base(string $html): bool
@@ -331,6 +331,6 @@ class ComponentManager extends ComponentInterface
      */
     public static function print(string ...$expressions): void
     {
-        echo implode(" ", $expressions);
+        echo  implode(" ", $expressions);
     }
 }

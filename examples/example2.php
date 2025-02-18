@@ -7,12 +7,13 @@
 
 declare(strict_types=1);
 
-use Oscurlo\ComponentRenderer\{Component, ComponentRenderer};
+use Oscurlo\ComponentRenderer\Component;
+use Oscurlo\ComponentRenderer\ComponentRenderer;
 
 include_once "../vendor/autoload.php";
 include_once "./register/components.php";
 
-$render = new ComponentRenderer;
+$render = new ComponentRenderer();
 
 $render->render(
     Component::template(
