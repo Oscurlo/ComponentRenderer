@@ -10,8 +10,8 @@ class ComponentInterpreter extends ComponentExecutor
 {
     /**
      * This method is responsible for searching for components within the html
-     * 
-     * @param string $html
+     *
+     * @param  string $html
      * @return string
      */
     protected function interpreter(string $html): string
@@ -71,8 +71,8 @@ class ComponentInterpreter extends ComponentExecutor
     }
 
     /**
-     * @param string $folder
-     * @param string $component
+     * @param  string $folder
+     * @param  string $component
      * @return array
      */
     private function getTagsForComponent(string $folder, string $component): array

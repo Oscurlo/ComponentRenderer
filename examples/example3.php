@@ -11,7 +11,7 @@ use Oscurlo\ComponentRenderer\ComponentRenderer;
 include_once "../vendor/autoload.php";
 include_once "./register/components.php";
 
-$render = new ComponentRenderer;
+$render = new ComponentRenderer();
 
 ?>
 

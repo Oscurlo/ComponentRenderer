@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Oscurlo\ComponentRenderer;
 
 use Exception;
-use Throwable;
 
 final class Component extends ComponentInterpreter
 {
@@ -13,19 +12,20 @@ final class Component extends ComponentInterpreter
 
     /**
      * Render and return content
-     * 
-     * @param string $html
-     * @param ?array $components
+     *
+     * @param  string $html
+     * @param  ?array $components
      * @return string
      */
     public static function render(string $html, ?array $components = null): string
     {
-        $self = new self;
+        $self = new self();
 
-        if ($components)
+        if ($components) {
             $self->set_component_manager(
                 $components
             );
+        }
 
         return $self->interpreter($html);
     }
@@ -33,9 +33,9 @@ final class Component extends ComponentInterpreter
     /**
      * Rendering template
      *
-     * @param string $filename
-     * @param array|null $vars
-     * @param object|null $props
+     * @param  string      $filename
+     * @param  array|null  $vars
+     * @param  object|null $props
      * @return string
      * @throws Exception
      */
@@ -44,7 +44,7 @@ final class Component extends ComponentInterpreter
         if (file_exists($filename)) {
             $pattern = "/\{\{(.*?)\}\}/s";
             $callback = function (array $matches): string {
-                $trim = fn(string &$string): string => $string = trim($string);
+                $trim = fn (string &$string): string => $string = trim($string);
                 [$all, $code] = $matches;
 
                 if (str_starts_with($trim($code), "@")) {
@@ -65,7 +65,7 @@ final class Component extends ComponentInterpreter
 
             ob_start();
 
-            eval ("?>" . preg_replace_callback($pattern, $callback, $subject));
+            eval("?>" . preg_replace_callback($pattern, $callback, $subject));
 
             return ob_get_clean();
         }

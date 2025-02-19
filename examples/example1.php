@@ -8,17 +8,18 @@
 
 declare(strict_types=1);
 
+use Oscurlo\ComponentRenderer\Component;
+use Oscurlo\ComponentRenderer\ComponentRenderer;
 use Oscurlo\ComponentRenderer\Examples\Components\Bootstrap;
-use Oscurlo\ComponentRenderer\{Component, ComponentRenderer};
 
 include_once "../vendor/autoload.php";
 
-$render = new ComponentRenderer;
+$render = new ComponentRenderer();
 
 $render->set_component_manager([
     __DIR__ . "\\components" => "Layout",
     "Oscurlo\\ComponentRenderer\\Examples\\Components" => ["Container", "Row", "Column", "InputField"],
-    Bootstrap::class => "card"
+    Bootstrap::class => "card",
 ]);
 
 $render->render(

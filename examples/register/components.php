@@ -9,5 +9,5 @@ Component::register_component([
     # 2. with namespace
     "Oscurlo\\ComponentRenderer\\Examples\\Components" => ["Container", "Row", "Column", "InputField", "TextareaField"],
         # 3. with references class
-    Bootstrap::class => "card"
+    Bootstrap::class => "card",
 ]);
