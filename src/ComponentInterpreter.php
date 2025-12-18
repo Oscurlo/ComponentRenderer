@@ -16,7 +16,7 @@ class ComponentInterpreter extends ComponentExecutor
      */
     protected function interpreter(string $html): string
     {
-        if (!self::$component_manager) {
+        if (!$this->component_manager) {
             return $html;
         }
 
@@ -39,7 +39,7 @@ class ComponentInterpreter extends ComponentExecutor
         self::convert_to_valid_tag($html);
 
         if ($this->dom->loadHTML($this->contains_html_base ? $html : self::html_base($html), LIBXML_NOERROR)) {
-            foreach (self::$component_manager as $references => $values) {
+            foreach ($this->component_manager as $references => $values) {
                 foreach ($values as $component) {
                     self::processComponent(
                         $references,

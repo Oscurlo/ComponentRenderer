@@ -21,7 +21,7 @@ class ComponentManager extends ComponentInterface
     public string $dom_encoding = "UTF-8";
 
     # Component path
-    protected static array $component_manager = [];
+    protected array $component_manager = [];
 
     # Validates if it contains the html tag and does not need to load a base content
     # I created this variable, for example, to load layouts.
@@ -37,7 +37,7 @@ class ComponentManager extends ComponentInterface
 
     public function set_component_manager(array $components): void
     {
-        $array = [...$components, ...self::$component_manager];
+        $array = [...$components, ...$this->component_manager];
         $components = array_map(
             fn (array|string $name) => is_string($name) ? [$name] : $name,
             $array
@@ -55,7 +55,7 @@ class ComponentManager extends ComponentInterface
             }
         }
 
-        self::$component_manager = [...$components, ...self::$component_manager];
+        $this->component_manager = [...$components, ...$this->component_manager];
     }
 
     /**
@@ -65,7 +65,7 @@ class ComponentManager extends ComponentInterface
      */
     public function get_component_manager(): ?array
     {
-        return self::$component_manager;
+        return $this->component_manager;
     }
 
     /**
@@ -109,7 +109,7 @@ class ComponentManager extends ComponentInterface
     {
         $array_tag = fn ($tag) => ["<{$tag}", "</{$tag}"];
 
-        foreach (self::$component_manager as $folder => $components) {
+        foreach ($this->component_manager as $folder => $components) {
             foreach ($components as $component) {
                 if (self::check("method", $folder, $component)) {
                     $split = explode("\\", $folder);
