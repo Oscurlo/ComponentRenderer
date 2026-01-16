@@ -39,7 +39,7 @@ final class Component extends ComponentInterpreter
      * @return string
      * @throws Exception
      */
-    public static function template(string $filename, array $vars = null, object $props = null): string
+    public static function template(string $filename, array|null $vars = null, object|null $props = null): string
     {
         if (file_exists($filename)) {
             $pattern = "/\{\{(.*?)\}\}/s";
