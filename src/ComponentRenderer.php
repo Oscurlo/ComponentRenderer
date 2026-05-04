@@ -4,43 +4,47 @@ declare(strict_types=1);
 
 namespace Oscurlo\ComponentRenderer;
 
-final class ComponentRenderer extends ComponentBuffer
+use Oscurlo\ComponentRenderer\Contracts\RendererInterface;
+
+/**
+ * Main entry point — instance-based API.
+ *
+ * Usage:
+ *   $renderer = new ComponentRenderer(['MyNS' => ['MyComponent']]);
+ *   $renderer->render('<MyComponent />');
+ *
+ *   // Or with output buffering:
+ *   $renderer->start();
+ *   echo '<MyComponent />';
+ *   $renderer->end();
+ */
+final class ComponentRenderer extends ComponentBuffer implements RendererInterface
 {
     /**
-     * For easier use, the construct also receives the folder where the components are located.
+     * Optionally register components at construction time.
      *
-     * @param array|null $components
+     * @param array<string, string|array<int, string>>|null $components
      */
     public function __construct(?array $components = null)
     {
         if ($components) {
-            self::set_component_manager(
-                $components
-            );
+            $this->set_component_manager($components);
         }
     }
 
-    # Option 1: Pass the html directly and display the content
-
     /**
-     * Render and display content
+     * Render and print the given HTML, optionally registering extra components.
      *
-     * @param  string $html
-     * @param  ?array $components
+     * @param  string                                        $html
+     * @param  array<string, string|array<int, string>>|null $components
      * @return void
      */
     public function render(string $html, ?array $components = null): void
     {
         if ($components) {
-            self::set_component_manager(
-                $components
-            );
+            $this->set_component_manager($components);
         }
 
-        self::print(
-            self::interpreter(
-                $html
-            )
-        );
+        self::print($this->interpreter($html));
     }
 }

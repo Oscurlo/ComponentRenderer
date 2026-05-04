@@ -6,12 +6,12 @@ use Oscurlo\ComponentRenderer\Component;
 
 function Layout(object $props): string
 {
-    $props->title ??= "...";
+    $props->title ??= "Example";
 
     return Component::render(
         Component::template(
-            filename: dirname(__DIR__) . "/layout/Layout.blade.php",
-            props: $props
-        )
+            filename: __DIR__ . "/../layout/Layout.php",
+            props: $props,
+        ),
     );
 }

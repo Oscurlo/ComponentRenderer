@@ -17,13 +17,19 @@ include_once "../vendor/autoload.php";
 $render = new ComponentRenderer();
 
 $render->set_component_manager([
+    // Register components from the "components" directory
     __DIR__ . "\\components" => "Layout",
-    "Oscurlo\\ComponentRenderer\\Examples\\Components" => ["Container", "Row", "Column", "InputField"],
+
+    // Register components from the "Oscurlo\\ComponentRenderer\\Examples\\Components" namespace
+    "Oscurlo\\ComponentRenderer\\Examples\\Components" => [
+        "Container",
+        "Row",
+        "Column",
+        "InputField",
+    ],
+
+    // Register the Bootstrap component from the "Oscurlo\\ComponentRenderer\\Examples\\Components" namespace
     Bootstrap::class => "card",
 ]);
 
-$render->render(
-    Component::template(
-        __DIR__ . "/templates/example.blade.php"
-    )
-);
+$render->render(Component::template(__DIR__ . "/templates/example.php"));

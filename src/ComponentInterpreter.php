@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Oscurlo\ComponentRenderer;
 
 use DOMDocument;
+use Oscurlo\ComponentRenderer\Support\HtmlHelper;
 
 class ComponentInterpreter extends ComponentExecutor
 {
     /**
-     * This method is responsible for searching for components within the html
+     * Parse the given HTML, find registered component tags, execute them,
+     * and return the final rendered HTML.
      *
      * @param  string $html
      * @return string
@@ -20,77 +22,99 @@ class ComponentInterpreter extends ComponentExecutor
             return $html;
         }
 
+        $this->dom = new DOMDocument($this->dom_version, $this->dom_encoding);
+        $this->dom->preserveWhiteSpace = false;
+        $this->dom->formatOutput = true;
 
-        $this->dom = new DOMDocument(
-            $this->dom_version,
-            $this->dom_encoding
-        );
+        $previousErrorSetting = libxml_use_internal_errors(true);
 
-        # https://www.php.net/manual/en/class.domdocument.php
-        $this->dom->preserveWhiteSpace = false; # Remove redundant white space
-        $this->dom->formatOutput = true; # Output formats with indentation and extra space.
+        $this->contains_html_base = HtmlHelper::isDocument($html);
 
-        $previousErrorSetting = libxml_use_internal_errors(
-            true
-        );
+        $this->convert_to_valid_tag($html);
 
-        $this->contains_html_base = self::contains_html_base($html);
+        $loaded = $this->contains_html_base
+            ? $html
+            : HtmlHelper::wrap($html, $this->dom_encoding);
 
-        self::convert_to_valid_tag($html);
+        if ($this->dom->loadHTML($loaded, LIBXML_NOERROR)) {
+            // Loop until no more components are rendered — handles nested components
+            do {
+                $rendered = false;
 
-        if ($this->dom->loadHTML($this->contains_html_base ? $html : self::html_base($html), LIBXML_NOERROR)) {
-            foreach ($this->component_manager as $references => $values) {
-                foreach ($values as $component) {
-                    self::processComponent(
-                        $references,
-                        $component
-                    );
+                foreach ($this->component_manager as $references => $values) {
+                    foreach ($values as $component) {
+                        $rendered =
+                            $this->processComponent($references, $component) ||
+                            $rendered;
+                    }
                 }
-            }
+            } while ($rendered);
         }
 
         libxml_use_internal_errors($previousErrorSetting);
 
-        return $this->contains_html_base ? $this->dom->saveHTML() : self::get_body($this->dom->saveHTML());
+        $output = $this->dom->saveHTML();
+
+        return HtmlHelper::tidy(
+            $this->contains_html_base
+                ? $output
+                : HtmlHelper::unwrap(
+                    $output,
+                    $this->dom_version,
+                    $this->dom_encoding,
+                ),
+        );
     }
 
     /**
-     * @param string $folder
-     * @param string $component
-     */
-    private function processComponent(string $folder, string $component): void
-    {
-        foreach (self::getTagsForComponent($folder, $component) as $tag) {
-            self::execute_component(
-                $folder,
-                $component,
-                self::get_params($tag),
-                $tag
-            );
-        }
-    }
-
-    /**
+     * Find and execute all instances of a single component in the current DOM.
+     *
      * @param  string $folder
      * @param  string $component
-     * @return array
+     * @return bool   Whether at least one instance was rendered
      */
-    private function getTagsForComponent(string $folder, string $component): array
+    private function processComponent(string $folder, string $component): bool
     {
-        $tagsList = [];
+        $rendered = false;
 
-
-        $tags = $this->dom->getElementsByTagName(
-            self::valid_tag(
-                $folder,
-                $component
-            )
-        );
-
-        foreach ($tags as $tag) {
-            $tagsList[] = $tag;
+        // Reverse order so replacing a node doesn't invalidate sibling indices
+        foreach (
+            array_reverse($this->getTagsForComponent($folder, $component))
+            as $tag
+        ) {
+            $rendered =
+                $this->execute_component(
+                    $folder,
+                    $component,
+                    $this->get_params($tag),
+                    $tag,
+                ) || $rendered;
         }
 
-        return $tagsList;
+        return $rendered;
+    }
+
+    /**
+     * Collect all DOM nodes matching a component's valid tag name.
+     * Snapshot into array first so DOM mutations don't break iteration.
+     *
+     * @param  string $folder
+     * @param  string $component
+     * @return array<int, \DOMNode>
+     */
+    private function getTagsForComponent(
+        string $folder,
+        string $component,
+    ): array {
+        $tags = $this->dom->getElementsByTagName(
+            $this->valid_tag($folder, $component),
+        );
+
+        $snapshot = [];
+        foreach ($tags as $tag) {
+            $snapshot[] = $tag;
+        }
+
+        return $snapshot;
     }
 }

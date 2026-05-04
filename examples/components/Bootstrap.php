@@ -14,19 +14,15 @@ final class Bootstrap
         $props->{"card-title"} ??= false;
         $props->{"card-footer"} ??= false;
 
-        $filename = dirname(__DIR__) . "/templates/card.blade.php";
+        $filename = __DIR__ . "/../templates/card.php";
 
-        return Component::render(Component::template(
-            filename: $filename,
-            props: $props
-        ));
+        return Component::render(
+            Component::template(filename: $filename, props: $props),
+        );
     }
 
     public function accordion(object $props): string
     {
-        // Destructuring in PHP is not that great, so it's best to avoid it just in case.
-        // @["id" => $id, "textContent" => $textContent, "index-collapse" => $indexCollapse] = (array) $props;
-
         $id = $props->{"id"} ?? "";
         $textContent = $props->{"textContent"} ?? "";
         $indexCollapse = $props->{"index-collapse"} ?? "";
@@ -37,8 +33,10 @@ final class Bootstrap
 
         $result = "";
 
-        $inCheck = fn (bool $check, mixed $yes, mixed $no) => $check ? $yes : $no;
-        $encode = fn (string $string) => base64_encode($string);
+        $inCheck = fn(bool $check, mixed $yes, mixed $no) => $check
+            ? $yes
+            : $no;
+        $encode = fn(string $string) => base64_encode($string);
 
         $jsonData = json_decode($textContent, true);
 
@@ -46,21 +44,31 @@ final class Bootstrap
             throw new Exception("JSON no is valid");
         }
 
-        $newAccordion = fn (array $info, int $index, int $chekIndex = 0) => <<<HTML
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button {$inCheck($index === $chekIndex, '', 'collapsed')}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{$encode('$index')}"
-                    aria-expanded="{$inCheck($index === $chekIndex, 'true', 'false')}" aria-controls="collapse{$encode('$index')}">
-                    {$info["title"]}
-                </button>
-            </h2>
-            <div id="collapse{$encode('$index')}" class="accordion-collapse collapse {$inCheck($index === $chekIndex, 'show', '')}" data-bs-parent="#{$id}">
-                <div class="accordion-body">
-                    {$info["body"]}
+        $newAccordion = function (
+            array $info,
+            int $index,
+            int $chekIndex = 0,
+        ) use ($inCheck, $encode, $id) {
+            $btnClass = $inCheck($index === $chekIndex, "", "collapsed");
+            $expanded = $inCheck($index === $chekIndex, "true", "false");
+            $show = $inCheck($index === $chekIndex, "show", "");
+            $collapseId = "collapse{$encode("$index")}";
+
+            return <<<HTML
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button {$btnClass}" type="button" data-bs-toggle="collapse" data-bs-target="#{$collapseId}" aria-expanded="{$expanded}" aria-controls="{$collapseId}">
+                        {$info["title"]}
+                    </button>
+                </h2>
+                <div id="{$collapseId}" class="accordion-collapse collapse {$show}" data-bs-parent="#{$id}">
+                    <div class="accordion-body">
+                        {$info["body"]}
+                    </div>
                 </div>
             </div>
-        </div>
-        HTML;
+            HTML;
+        };
 
         foreach ($jsonData as $i => $data) {
             $result .= $newAccordion($data, $i, (int) $indexCollapse) ?: 0;
