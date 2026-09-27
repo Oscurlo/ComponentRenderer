@@ -96,6 +96,8 @@ final class HtmlHelper
             "indent" => true,
             "indent-spaces" => 4,
             "wrap" => 0,
+            "logical-emphasis" => false,
+            "drop-empty-elements" => false,
         ];
 
         $tidy = new Tidy();

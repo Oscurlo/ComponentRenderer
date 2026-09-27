@@ -162,6 +162,10 @@ class ComponentRegistry
     ): string {
         $prefix = "component-";
 
+        if (str_contains($component, "::")) {
+            $component = explode("::", $component)[1];
+        }
+
         if (str_contains($component, $prefix)) {
             return $component;
         }
@@ -203,11 +207,11 @@ class ComponentRegistry
             "file" => file_exists(
                 static::get_file($folder_or_function, $component),
             ),
-            "method" => method_exists($folder_or_function, $component),
+            "method" => method_exists($folder_or_function, $component) || (method_exists($folder_or_function, "__call") || method_exists($folder_or_function, "__callStatic")),
             "function" => function_exists(
                 static::valid_name_function($folder_or_function, $component),
             ),
-            "method_normal" => method_exists($class, $method),
+            "method_normal" => method_exists($class, $method) || (method_exists($class, "__call") || method_exists($class, "__callStatic")),
             "function_normal" => function_exists($component),
         };
 
