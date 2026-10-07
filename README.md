@@ -38,6 +38,7 @@ $renderer->render('<Card title="Hello"><Button>Click me</Button></Card>');
 | [example4.php](./examples/example4.php) | Static API with `Component::render()` |
 | [example5.php](./examples/example5.php) | `PropsCaster` — type-safe props (bool, int, array…) |
 | [example6.php](./examples/example6.php) | Nested components + `Bootstrap::accordion` inside a card |
+| [example7.php](./examples/example7.php) | Dynamic components via `__call()` (`<Svg::star />` loads `star.svg`) |
 
 ## Requirements
 

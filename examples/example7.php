@@ -1,13 +1,19 @@
 <?php
 
 /**
- * Example 7 — Dinamic
+ * Example 7 — Dynamic components with __call()
  *
- * Que tal si nos ponemos creativos?
- * 
- * Este componente usa el metodo magico de __call para no tener que tener que depender de un metodo existente para funcionar
- * 
- * Para este caso quiero cargar svg(s) y el funcionamiendo para todos es el mismo le indico el svg que quiero cargar como un componente y el funcionamiento es el mismo
+ * A component does not need a dedicated method. If the registered class
+ * implements __call() / __callStatic(), every name you register for it is
+ * routed there, and the name arrives as the first argument.
+ *
+ * Here the Svg class treats the component name as a file name:
+ * <Svg::star /> renders assets/svg/star.svg, <Svg::heart /> renders heart.svg…
+ * Adding an icon means dropping a file in assets/svg/ — no new PHP code.
+ * Names without a matching file fall back to assets/svg/default.svg.
+ *
+ * Best for: icon sets, view loaders, proxies — any group of components
+ * that share the same logic.
  */
 
 declare(strict_types=1);
@@ -20,9 +26,15 @@ include_once "../vendor/autoload.php";
 $render = new ComponentRenderer();
 
 $render->set_component_manager([
-    Svg::class => "default"
+    // Every name registered here is handled by Svg::__call()
+    Svg::class => ["default", "star", "heart"],
 ]);
 
 $render->render(<<<HTML
-<Svg::default width="100" height="100" />
+<div style="display: flex; gap: 16px; align-items: center; padding: 16px;">
+    <Svg::default width="48" height="48" />
+    <Svg::star width="48" height="48" />
+    <Svg::heart width="48" height="48" />
+    <Svg::star />
+</div>
 HTML);

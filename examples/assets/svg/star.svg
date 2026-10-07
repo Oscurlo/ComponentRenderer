@@ -1,0 +1,1 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="{{ $props->width }}" height="{{ $props->height }}" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><polygon fill="#f5b301" points="12,2 14.94,8.55 22,9.27 16.7,14.02 18.18,21 12,17.45 5.82,21 7.3,14.02 2,9.27 9.06,8.55"/></svg>

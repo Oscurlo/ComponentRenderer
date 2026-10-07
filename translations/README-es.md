@@ -305,7 +305,9 @@ Disponible en `Oscurlo\ComponentRenderer\Support\HtmlHelper`.
 |---|---|
 | `HtmlHelper::wrap($html, $encoding)` | Envuelve un fragmento en un documento HTML mínimo para que DOMDocument pueda parsearlo |
 | `HtmlHelper::unwrap($html)` | Extrae el contenido del `<body>` de un documento HTML completo |
-| `HtmlHelper::isDocument($html)` | Retorna `true` si el string contiene un documento `<html>...</html>` completo |
+| `HtmlHelper::isDocument($html)` | Retorna `true` si el string es un documento HTML real: debe empezar con `<html>` (tras espacios, comentarios y doctype opcionales) |
+| `HtmlHelper::isWrapped($html)` | Retorna `true` si el string es el wrapper generado por `wrap()` (lleva el marcador `data-component-renderer`) |
+| `HtmlHelper::stripWrapper($html)` | Quita el wrapper de `wrap()` trabajando sobre el string crudo, así se conserva el case de las etiquetas personalizadas (a diferencia de `unwrap()`) |
 
 ---
 
@@ -319,6 +321,7 @@ Disponible en `Oscurlo\ComponentRenderer\Support\HtmlHelper`.
 | [example4.php](../examples/example4.php) | API estática con `Component::render()` |
 | [example5.php](../examples/example5.php) | `PropsCaster` — props con tipo (bool, int, array…) |
 | [example6.php](../examples/example6.php) | Componentes anidados + `Bootstrap::accordion` dentro de una card |
+| [example7.php](../examples/example7.php) | Componentes dinámicos con `__call()` (`<Svg::star />` carga `star.svg`) |
 
 ---
 
@@ -333,7 +336,7 @@ src/
 │   ├── HandlesAttributes.php    # get_attributes(), extract_attributes()
 │   └── RendersOutput.php        # print(), start(), end()
 ├── Support/
-│   └── HtmlHelper.php           # wrap(), unwrap(), isDocument()
+│   └── HtmlHelper.php           # wrap(), unwrap(), isDocument(), isWrapped(), stripWrapper()
 ├── PropsCaster.php              # Type casting de props
 ├── ComponentInterface.php       # Alias @deprecated de PropsCaster
 ├── ComponentRegistry.php        # Registro y resolución de componentes

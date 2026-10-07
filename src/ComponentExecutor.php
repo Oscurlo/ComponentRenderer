@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Oscurlo\ComponentRenderer;
 
+use DOMComment;
 use DOMDocument;
 use DOMNode;
+use DOMText;
 use Oscurlo\ComponentRenderer\Concerns\HandlesDom;
 use Oscurlo\ComponentRenderer\Support\HtmlHelper;
 
@@ -38,13 +40,45 @@ class ComponentExecutor extends ComponentRegistry
             return false;
         }
 
-        if (HtmlHelper::isDocument($source)) {
+        // Swap the whole DOM only when a layout wraps the entire page.
+        // Anywhere else, graft just the component's content and keep the rest.
+        if (HtmlHelper::isDocument($source) && $this->isOnlyContent($tag)) {
             $this->contains_html_base = true;
             $this->dom->loadHTML($source, LIBXML_NOERROR);
             return true;
         }
 
         return $this->replace_component($source, $tag);
+    }
+
+    /**
+     * Whether the tag is the only meaningful content of its <body>
+     * (ignoring whitespace and comments), i.e. a layout wrapping the whole page.
+     *
+     * @param  DOMNode $tag
+     * @return bool
+     */
+    private function isOnlyContent(DOMNode $tag): bool
+    {
+        $parent = $tag->parentNode;
+
+        if (!$parent || strtolower($parent->nodeName) !== "body") {
+            return false;
+        }
+
+        foreach ($parent->childNodes as $sibling) {
+            if ($sibling->isSameNode($tag) || $sibling instanceof DOMComment) {
+                continue;
+            }
+
+            if ($sibling instanceof DOMText && trim($sibling->textContent) === "") {
+                continue;
+            }
+
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -62,9 +96,9 @@ class ComponentExecutor extends ComponentRegistry
     ): ?string {
         return match (true) {
             $this->check("method", $references, $component)
-                => (string) (new $references())->$component($attributes),
+            => (string) (new $references())->$component($attributes),
             $this->check("function", $references, $component)
-                => (string) $this->valid_name_function($references, $component)($attributes),
+            => (string) $this->valid_name_function($references, $component)($attributes),
             default => null,
         };
     }
@@ -95,9 +129,9 @@ class ComponentExecutor extends ComponentRegistry
 
         return match (true) {
             $this->check("method_normal", $references, $component)
-                => (string) (new $class())->$method($attributes),
+            => (string) (new $class())->$method($attributes),
             $this->check("function_normal", $references, $component)
-                => (string) $component($attributes),
+            => (string) $component($attributes),
             default => null,
         };
     }

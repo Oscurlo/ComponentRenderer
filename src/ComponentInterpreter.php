@@ -10,6 +10,12 @@ use Oscurlo\ComponentRenderer\Support\HtmlHelper;
 class ComponentInterpreter extends ComponentExecutor
 {
     /**
+     * Nesting level of interpreter() calls. A component may render HTML on its
+     * own (Component::render inside a component), so renders can be nested.
+     */
+    private static int $depth = 0;
+
+    /**
      * Parse the given HTML, find registered component tags, execute them,
      * and return the final rendered HTML.
      *
@@ -21,6 +27,35 @@ class ComponentInterpreter extends ComponentExecutor
         if (!$this->component_manager) {
             return $html;
         }
+
+        self::$depth++;
+
+        try {
+            $output = $this->interpretHtml($html);
+        } finally {
+            self::$depth--;
+        }
+
+        // Only the outermost render tidies the result. A nested render still
+        // holds tags of components that the outer render has yet to execute,
+        // and Tidy would discard them as unknown elements.
+        return self::$depth === 0 ? HtmlHelper::tidy($output) : $output;
+    }
+
+    /**
+     * Parse, execute the components and serialize the DOM (without tidying).
+     *
+     * @param  string $html
+     * @return string
+     */
+    private function interpretHtml(string $html): string
+    {
+        if (!$this->component_manager) {
+            return $html;
+        }
+
+        // Input already wrapped by the library: treat it as a fragment
+        $html = HtmlHelper::stripWrapper($html);
 
         $this->dom = new DOMDocument($this->dom_version, $this->dom_encoding);
         $this->dom->preserveWhiteSpace = false;
@@ -55,15 +90,13 @@ class ComponentInterpreter extends ComponentExecutor
 
         $output = $this->dom->saveHTML();
 
-        return HtmlHelper::tidy(
-            $this->contains_html_base
-                ? $output
-                : HtmlHelper::unwrap(
-                    $output,
-                    $this->dom_version,
-                    $this->dom_encoding,
-                ),
-        );
+        return $this->contains_html_base
+            ? $output
+            : HtmlHelper::unwrap(
+                $output,
+                $this->dom_version,
+                $this->dom_encoding,
+            );
     }
 
     /**

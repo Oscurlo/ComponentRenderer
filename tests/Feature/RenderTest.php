@@ -6,6 +6,7 @@ namespace Oscurlo\ComponentRenderer\Tests\Feature;
 
 use Oscurlo\ComponentRenderer\Component;
 use Oscurlo\ComponentRenderer\ComponentRenderer;
+use Oscurlo\ComponentRenderer\Support\HtmlHelper;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -20,6 +21,34 @@ function Alert(object $props): string
 function Badge(object $props): string
 {
     return "<span class=\"badge\">{$props->textContent}</span>";
+}
+
+/**
+ * Returns a full document (a layout) that receives the page as children.
+ */
+function Layout(object $props): string
+{
+    return "<!DOCTYPE html><html lang=\"en\"><head><title>Test layout</title></head><body><main>{$props->children}</main></body></html>";
+}
+
+/**
+ * Returns a plain fragment that merely mentions an <html> tag inside a comment.
+ */
+function CodeSample(object $props): string
+{
+    return "<div class=\"sample\"><!-- <html lang=\"en\"></html> --><p>kept</p></div>";
+}
+
+/**
+ * Renders its own markup through a nested Component::render() that does NOT
+ * know the components living inside $props->children (they are still pending).
+ */
+function Frame(object $props): string
+{
+    return Component::render(
+        "<section class=\"frame\">{$props->children}</section>",
+        ["Oscurlo\\ComponentRenderer\\Tests\\Feature" => ["Badge"]],
+    );
 }
 
 class RenderTest extends TestCase
@@ -142,6 +171,97 @@ class RenderTest extends TestCase
 
         $this->assertStringContainsString("alert-success", $output);
         $this->assertStringContainsString("Done!", $output);
+    }
+
+    // -------------------------------------------------------------------------
+    // Layouts (components returning a full document) vs. fragments
+    // -------------------------------------------------------------------------
+
+    public function test_layout_as_page_root_returns_the_full_document(): void
+    {
+        $result = Component::render("<Layout><p>Hi</p></Layout>", [
+            self::NAMESPACE => ["Layout"],
+        ]);
+
+        $this->assertStringContainsString("<title>Test layout</title>", $result);
+        $this->assertStringContainsString("<main>", $result);
+        $this->assertStringContainsString("Hi", $result);
+        $this->assertStringNotContainsString("<Layout", $result);
+        $this->assertStringNotContainsString("component-layout", $result);
+    }
+
+    public function test_layout_root_ignores_surrounding_whitespace_and_comments(): void
+    {
+        $result = Component::render(
+            "<!-- page -->\n  <Layout><p>Hi</p></Layout>\n",
+            [self::NAMESPACE => ["Layout"]],
+        );
+
+        $this->assertStringContainsString("<title>Test layout</title>", $result);
+        $this->assertStringContainsString("Hi", $result);
+    }
+
+    public function test_layout_with_surrounding_content_keeps_that_content(): void
+    {
+        $result = Component::render(
+            "<p>before</p><Layout><p>inside</p></Layout><p>after</p>",
+            [self::NAMESPACE => ["Layout"]],
+        );
+
+        $this->assertStringContainsString("before", $result);
+        $this->assertStringContainsString("inside", $result);
+        $this->assertStringContainsString("after", $result);
+    }
+
+    public function test_fragment_mentioning_html_tag_is_not_treated_as_a_layout(): void
+    {
+        $result = Component::render(
+            "<p>before</p><CodeSample></CodeSample><p>after</p>",
+            [self::NAMESPACE => ["CodeSample"]],
+        );
+
+        $this->assertStringContainsString("before", $result);
+        $this->assertStringContainsString("kept", $result);
+        $this->assertStringContainsString("after", $result);
+    }
+
+    public function test_input_wrapped_by_the_library_is_treated_as_a_fragment(): void
+    {
+        $result = Component::render(HtmlHelper::wrap("<Badge>9</Badge>"), [
+            self::NAMESPACE => ["Badge"],
+        ]);
+
+        $this->assertStringContainsString("badge", $result);
+        $this->assertStringContainsString("9", $result);
+        $this->assertStringNotContainsString("<Badge", $result);
+        $this->assertStringNotContainsString(HtmlHelper::WRAPPER_MARKER, $result);
+    }
+
+    // -------------------------------------------------------------------------
+    // Nested renders (a component calling Component::render itself)
+    // -------------------------------------------------------------------------
+
+    public function test_nested_render_keeps_components_pending_in_the_outer_render(): void
+    {
+        // Frame is registered first, so it runs while <Alert> is still pending
+        $result = Component::render(
+            "<Frame><Alert type=\"info\">hi</Alert></Frame>",
+            [self::NAMESPACE => ["Frame", "Alert"]],
+        );
+
+        $this->assertStringContainsString("frame", $result);
+        $this->assertStringContainsString("alert-info", $result);
+        $this->assertStringNotContainsString("component-alert", $result);
+    }
+
+    public function test_nested_render_gives_the_same_result_in_any_registration_order(): void
+    {
+        $html = "<Frame><Alert type=\"info\">hi</Alert></Frame>";
+
+        $first = Component::render($html, [self::NAMESPACE => ["Frame", "Alert"]]);
+        $second = Component::render($html, [self::NAMESPACE => ["Alert", "Frame"]]);
+
+        $this->assertSame($second, $first);
     }
 
     // -------------------------------------------------------------------------

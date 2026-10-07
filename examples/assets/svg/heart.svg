@@ -1,0 +1,1 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="{{ $props->width }}" height="{{ $props->height }}" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24"><path fill="#e0245e" d="M12 21C5 15.5 2 12 2 8.2A5.2 5.2 0 0 1 12 6.1 5.2 5.2 0 0 1 22 8.2C22 12 19 15.5 12 21Z"/></svg>
